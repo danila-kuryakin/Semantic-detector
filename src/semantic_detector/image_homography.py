@@ -165,11 +165,14 @@ def image_homography(img):
 
 
 if __name__ == '__main__':
-    image = cv2.imread('../resources/dataset/BirdView/001---changzhou/east_1.jpg')
-    cv2.imshow('out', cv2.resize(image, (800, 600)))
-    bird_view = image_homography(image)
+    image = cv2.imread('../resources/dataset/BirdView/013---yancheng/east_1.jpg')
+    image2 = cv2.imread('../resources/dataset/BirdView/013---yancheng/west_1.jpg')
+    bird_view1 = image_homography(image)
+    bird_view2 = image_homography(image2)
 
     cv2.imwrite('../../out/homography.jpg', image)
-    cv2.imwrite('../../out/linesDetected.jpg', bird_view)
+    cv2.imwrite('../../out/linesDetected.jpg', bird_view1)
+    cv2.imwrite('../../out/linesDetected2.jpg', bird_view2)
+
 
     cv2.waitKey()
