@@ -182,6 +182,6 @@ if __name__ == '__main__':
     bird_view = image_homography(img)
 
     cv2.imwrite('../../out/linesDetected.jpg', img)
-    # cv2.imwrite('../../out/homography.jpg', bird_view)
+    cv2.imwrite('../../out/homography.jpg', bird_view)
 
     cv2.waitKey()
