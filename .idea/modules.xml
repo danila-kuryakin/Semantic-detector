@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/pythonSinematic.iml" filepath="$PROJECT_DIR$/.idea/pythonSinematic.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/Semantic-detector.iml" filepath="$PROJECT_DIR$/.idea/Semantic-detector.iml" />
     </modules>
   </component>
 </project>

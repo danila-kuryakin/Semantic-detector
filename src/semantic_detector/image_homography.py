@@ -6,16 +6,22 @@ import numpy as np
 # y = kx + b
 def find_line_equation(line):
     x1, y1, x2, y2 = line
-    k = (y1 - y2) / (x1 - x2)
-    b = y2 - k * x2
-    return {'k': k, 'b': b}
+    if (x1 - x2) != 0:
+        k = (y1 - y2) / (x1 - x2)
+        b = y2 - k * x2
+        return {'k': k, 'b': b}
+    else:
+        return {'k': 0, 'b': 0}
 
 
 # Looking for the point where the lines intersect
 def find_intersection_point(line_a, line_b):
-    x = round((line_b['b'] - line_a['b']) / (line_a['k'] - line_b['k']))
-    y = round(line_b['k'] * x + line_b['b'])
-    return x, y
+    if (line_a['k'] - line_b['k']) != 0:
+        x = round((line_b['b'] - line_a['b']) / (line_a['k'] - line_b['k']))
+        y = round(line_b['k'] * x + line_b['b'])
+        return x, y
+    else:
+        return 0, 0
 
 
 def line_detection(img):
@@ -47,7 +53,7 @@ def line_detection(img):
     gauss = cv2.GaussianBlur(finallyMask, (7, 7), cv2.BORDER_DEFAULT)
     cv2.imshow("GaussianBlur", cv2.resize(gauss, (800, 600)))
     # Canny for GaussianBlur
-    testEdges = cv2.Canny(gauss, 50, 150, apertureSize=7)
+    testEdges = cv2.Canny(gauss, 10, 30, apertureSize=7)
     cv2.imshow('TestEdges.jpg', cv2.resize(testEdges, (800, 600)))
     # END TEST CODE
 
@@ -56,7 +62,7 @@ def line_detection(img):
     cv2.imshow('Grey.jpg', cv2.resize(edges, (800, 600)))
 
     # Line detection
-    lines = cv2.HoughLinesP(testEdges, 1, np.pi / 180, 250, minLineLength=height - height // 5, maxLineGap=height)
+    lines = cv2.HoughLinesP(testEdges, 1, np.pi / 180, 250, minLineLength=height - round(height / 5), maxLineGap=height)
 
     left_line = [width, 0, width, height]
     right_line = [0, 0, 0, height]
@@ -159,8 +165,8 @@ def image_homography(img):
 
 
 if __name__ == '__main__':
-    image = cv2.imread('east_1.jpg')
-
+    image = cv2.imread('../resources/dataset/BirdView/001---changzhou/east_1.jpg')
+    cv2.imshow('out', cv2.resize(image, (800, 600)))
     bird_view = image_homography(image)
 
     cv2.imwrite('linesDetected.jpg', image)
