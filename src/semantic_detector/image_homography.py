@@ -209,7 +209,7 @@ if __name__ == '__main__':
    #main_img = cv2.resize(main_image, (1920, 1920))
    #match = matching_images(bird_view, main_img)
 
-    #cv2.imwrite('./out/linesDetected.jpg', img)
-    cv2.imwrite('E:/Semantic-detector/out/homography.jpg', bird_view)
+    #cv2.imwrite('../../Semantic-detector/out/linesDetected.jpg', img)
+    cv2.imwrite('../../out/homography.jpg', bird_view)
 
     cv2.waitKey()
