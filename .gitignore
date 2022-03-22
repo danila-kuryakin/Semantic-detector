@@ -132,6 +132,5 @@ dmypy.json
 .idea
 
 # Dataset
-resources/dataset
-outt/
-resources/
+out/
+src/
