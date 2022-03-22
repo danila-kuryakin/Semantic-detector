@@ -9,9 +9,12 @@ from cv2 import CV_32F, flann
 
 def find_line_equation(line):
     x1, y1, x2, y2 = line
-    k = (y1 - y2) / (x1 - x2)
-    b = y2 - k * x2
-    return {'k': k, 'b': b}
+    if ((x1 - x2))!=0:
+        k = (y1 - y2) / (x1 - x2)
+        b = y2 - k * x2
+        return {'k': k, 'b': b}
+    else:
+        return {'k': 0, 'b': 0}
 
 
 # Looking for the point where the lines intersect
@@ -34,29 +37,29 @@ def line_detection(img):
 
     # Convert the img to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    #cv2.imshow('gray', cv2.resize(gray, (800, 600)))
+    cv2.imshow('gray', cv2.resize(gray, (800, 600)))
 
     #adjust contrast
     a = 5
     b= -500
     darken = cv2.addWeighted(gray, a, np.zeros(gray.shape,gray.dtype), 0, b)
-    #cv2.imshow('darken', cv2.resize(darken, (800, 600)))
+    cv2.imshow('darken', cv2.resize(darken, (800, 600)))
 
     # bluring image
     Blurrr = cv2.GaussianBlur(darken,(5,5),cv2.BORDER_DEFAULT)
-    #cv2.imshow('Blurrr', cv2.resize(Blurrr, (800, 600)))
+    cv2.imshow('Blurrr', cv2.resize(Blurrr, (800, 600)))
 
     # little moooore contrast
     a = 2
     b = -100
     darken2 = cv2.addWeighted(Blurrr, a, np.zeros(gray.shape, gray.dtype), 0, b)
-    #cv2.imshow('darken2', cv2.resize(darken2, (800, 600)))
+    cv2.imshow('darken2', cv2.resize(darken2, (800, 600)))
 
 
     #################
     # Canny filter
     edges = cv2.Canny(darken2, 100, 300, apertureSize=3)
-    #cv2.imshow('edges', cv2.resize(edges, (800, 600)))
+    cv2.imshow('edges', cv2.resize(edges, (800, 600)))
 
     #trsh = apply_threshold(gray)####
    # cv2.imshow('trsh', cv2.resize(trsh, (800, 600)))
@@ -99,7 +102,7 @@ def line_detection(img):
 
     # TODO: bad idea
     # Find up line
-    up_line = (down_line[0], down_line[1] - height // 2, down_line[2], down_line[3] - height // 2)# start_width start_heigh end_width end_heigh
+    up_line = (down_line[0], down_line[1]+150 - height // 2, down_line[2], down_line[3]+150 - height // 2)# start_width start_heigh end_width end_heigh
 
     return left_line, right_line, up_line, down_line
 
@@ -165,9 +168,9 @@ def image_homography(img):
     cropped_image = resize[size_2[0]//2:size_2[0]*2, size_2[1]//20:size_2[1]*2]
 
     # View image
-    #cv2.imshow('img', cv2.resize(img, (1920, 1080)))
-    #v2.imshow('bird_view', cv2.resize(bird_view, (1920, 1080)))
-    cv2.imshow('cropped_image', cv2.resize(cropped_image, (1920, 1080)))
+    cv2.imshow('img', cv2.resize(img, (1920, 1080)))
+    cv2.imshow('bird_view', cv2.resize(bird_view, (1920, 1080)))
+    #cv2.imshow('cropped_image', cv2.resize(cropped_image, (1920, 1080)))
     return bird_view
 
 ##not working
@@ -197,8 +200,8 @@ def matching_images(camera_img, main_img) :
 
 if __name__ == '__main__':
 
-    #img = cv2.imread('resources/dataset/BirdView/001---changzhou/north_1.jpg')
-    img = cv2.imread('resources/dataset/BirdView/011---taiyuan/east_1.jpg')
+    #img = cv2.imread('resources/dataset/BirdView/010---rongguixinma/south_1.jpg')
+    img = cv2.imread('./src/resources/dataset/BirdView/011---taiyuan/west_1.jpg')
     bird_view = image_homography(img)
 
 
@@ -206,7 +209,7 @@ if __name__ == '__main__':
    #main_img = cv2.resize(main_image, (1920, 1920))
    #match = matching_images(bird_view, main_img)
 
-    #cv2.imwrite('../../outt/linesDetected.jpg', img)
-    cv2.imwrite('outt/homography.jpg', bird_view)
+    #cv2.imwrite('out/linesDetected.jpg', img)
+    cv2.imwrite('./out/homography.jpg', bird_view)
 
     cv2.waitKey()
