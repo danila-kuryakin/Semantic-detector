@@ -200,16 +200,16 @@ def matching_images(camera_img, main_img) :
 
 if __name__ == '__main__':
 
-    #img = cv2.imread('resources/dataset/BirdView/010---rongguixinma/south_1.jpg')
+    #img = cv2.imread('./src/resources/dataset/BirdView/010---rongguixinma/south_1.jpg')
     img = cv2.imread('./src/resources/dataset/BirdView/011---taiyuan/west_1.jpg')
     bird_view = image_homography(img)
 
 
-   #main_image = cv2.imread('resources/dataset/BirdView/001---changzhou/LongJin_3cm.jpg')
+   #main_image = cv2.imread('./src/resources/dataset/BirdView/001---changzhou/LongJin_3cm.jpg')
    #main_img = cv2.resize(main_image, (1920, 1920))
    #match = matching_images(bird_view, main_img)
 
-    #cv2.imwrite('out/linesDetected.jpg', img)
+    #cv2.imwrite('./out/linesDetected.jpg', img)
     cv2.imwrite('./out/homography.jpg', bird_view)
 
     cv2.waitKey()
