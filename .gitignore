@@ -135,4 +135,3 @@ dmypy.json
 src/resources/images
 src/resources/dataset/*
 out/
-venv/
