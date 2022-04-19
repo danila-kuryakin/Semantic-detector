@@ -20,42 +20,39 @@ def find_intersection_point(line_a, line_b):
 
 def line_detection(img):
     height, width, _ = img.shape
-    blackout = 100
 
     # Convert the img to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    cv2.imshow('gray', cv2.resize(gray, (400, 300)))
+    # cv2.imshow('gray', cv2.resize(gray, (400, 300)))
 
-    darkened = numpy.array(gray)
+    # Darkness
+    darkGrey = cv2.addWeighted(gray, 0.4, np.zeros(gray.shape, gray.dtype), 0.6, 0.0)
+    # cv2.imshow("DarkGrey", cv2.resize(darkGrey, (400, 300)))
 
-    for h in range(0, height):
-        for w in range(0, width):
-            if darkened[h, w] < blackout:
-                darkened[h, w] = 0
-            else:
-                darkened[h, w] = gray[h, w] - blackout
-
-    cv2.imshow('darkened', cv2.resize(darkened, (400, 300)))
-
+    # HLS
     imgHLS = cv2.cvtColor(img, cv2.COLOR_BGR2HLS)
+    # cv2.imshow("imgHLS", cv2.resize(imgHLS, (400, 300)))
 
-    cv2.imshow('HLS', cv2.resize(imgHLS, (400, 300)))
+    # Yellow highlight
+    HLSYellow = cv2.inRange(imgHLS, (10, 100, 60), (40, 255, 255))
+    # cv2.imshow("HLSYellow", cv2.resize(HLSYellow, (400, 300)))
 
+    # White highlight
+    HLSWhite = cv2.inRange(imgHLS, (0, 180, 0), (255, 255, 255))
+    # cv2.imshow("HLSWhite", cv2.resize(HLSWhite, (400, 300)))
 
-    yellow = cv2.inRange(imgHLS, (10, 100, 0), (40, 255, 255))
-    white = cv2.inRange(imgHLS, (0, 0, 200), (255, 255, 255))
-    cv2.imshow('yellow', cv2.resize(yellow, (400, 300)))
-    cv2.imshow('white', cv2.resize(white, (400, 300)))
+    # Create Mask
+    mask = cv2.bitwise_or(HLSWhite, HLSYellow)
+    finallyMask = cv2.bitwise_and(darkGrey, darkGrey, mask=mask)
+    # cv2.imshow("finallyMask", cv2.resize(finallyMask, (400, 300)))
 
-    mask = yellow | white
-    gray_mask = mask & gray
+    # GaussianBlur for Mask
+    gauss = cv2.GaussianBlur(finallyMask, (7, 7), cv2.BORDER_DEFAULT)
+    # cv2.imshow("GaussianBlur", cv2.resize(gauss, (400, 300)))
 
-    gaussian_gray_mask = cv2.GaussianBlur(gray_mask, (7, 7), cv2.BORDER_DEFAULT)
-    cv2.imshow('gaussian_gray_mask', cv2.resize(gaussian_gray_mask, (400, 300)))
-
-    # Canny filter
-    edges = cv2.Canny(gaussian_gray_mask, 50, 150, apertureSize=3)
-    cv2.imshow('Canny', cv2.resize(edges, (400, 300)))
+    # Canny for GaussianBlur
+    edges = cv2.Canny(gauss, 50, 150, apertureSize=7)
+    # cv2.imshow('Canny', cv2.resize(edges, (400, 300)))
 
     # Line detection
     lines = cv2.HoughLinesP(edges, 1, np.pi/180, 200, minLineLength=height-height//2, maxLineGap=height)
@@ -94,8 +91,6 @@ def line_detection(img):
                 down_line = [x1, y1, x2, y2]
             continue
 
-    print(len(vertical_line))
-
     for line in vertical_line:
         if line[2] > right_line[2]:
             right_line = line
@@ -133,6 +128,7 @@ def point_detection(left_line, right_line, up_line, down_line):
 
 
 def image_homography(img):
+
     height, width, _ = img.shape
     # TODO: remove magic
     magic_indent = 150
@@ -168,20 +164,34 @@ def image_homography(img):
     h, mask = cv2.findHomography(img_square_corners, img_quad_corners)
     bird_view = cv2.warpPerspective(img, h, (width, height))
 
-    # View image
-    cv2.imshow('img', cv2.resize(img, (800, 600)))
-    cv2.imshow('out', cv2.resize(bird_view, (800, 600)))
-
     return bird_view
+
+
+def start(path, name):
+    full_path = path + '/' + name
+
+    img = cv2.imread(full_path)
+    try:
+        bird_view = image_homography(img)
+
+        # View image
+        cv2.imshow('ld_' + name, cv2.resize(img, (400, 300)))
+        cv2.imwrite('../../out/ld_' + name, img)
+
+        cv2.imshow('h_' + name, cv2.resize(bird_view, (400, 300)))
+        cv2.imwrite('../../out/h_' + name, bird_view)
+    except Exception as e:
+        print('Error: ', name)
+        print(e)
 
 
 if __name__ == '__main__':
 
-    img = cv2.imread('../resources/dataset/BirdView/001---changzhou/west_1.jpg')
+    path = '../resources/dataset/BirdView/001---changzhou'
 
-    bird_view = image_homography(img)
-
-    cv2.imwrite('../../out/linesDetected.jpg', img)
-    cv2.imwrite('../../out/homography.jpg', bird_view)
+    start(path, 'west_1.jpg')
+    # start(path, 'east_1.jpg')
+    # start(path, 'south_1.jpg')
+    # start(path, 'north_1.jpg')
 
     cv2.waitKey()
