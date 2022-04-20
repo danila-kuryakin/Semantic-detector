@@ -52,10 +52,10 @@ def line_detection(img):
 
     # Canny for GaussianBlur
     edges = cv2.Canny(gauss, 50, 150, apertureSize=7)
-    # cv2.imshow('Canny', cv2.resize(edges, (400, 300)))
+    cv2.imshow('Canny', cv2.resize(edges, (400, 300)))
 
     # Line detection
-    lines = cv2.HoughLinesP(edges, 1, np.pi/180, 200, minLineLength=height-height//2, maxLineGap=height)
+    lines = cv2.HoughLinesP(edges, 1, np.pi/180, 200, minLineLength=50, maxLineGap=200)
 
     start_left_line = [width, 0, width, height]
     left_line = start_left_line
@@ -70,7 +70,7 @@ def line_detection(img):
     for line in lines:
 
         x1, y1, x2, y2 = line[0]
-        # cv2.line(img, (x1, y1), (x2, y2), (0, 127, 127), 2)
+        cv2.line(img, (x1, y1), (x2, y2), (0, 127, 127), 2)
         # Classification vertical lines
         if y2 > height-height//4 and y1 < height//4:
             # View lines
