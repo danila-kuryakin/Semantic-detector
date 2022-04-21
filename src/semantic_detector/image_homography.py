@@ -5,6 +5,7 @@ import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
 import math
+import pickle
 
 # Searches for linear equation variables
 # y = kx + b
@@ -61,35 +62,35 @@ def line_detection(img):
 '''
 
     # TEST CODE
-   # cv2.imshow("Original", cv2.resize(img, (800, 600)))
+    #cv2.imshow("Original", cv2.resize(img, (800, 600)))
 
     # Convert the img to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-   # cv2.imshow("Grey", cv2.resize(gray, (800, 600)))
+    #cv2.imshow("Grey", cv2.resize(gray, (800, 600)))
 
     # Darkness
     darkGrey = cv2.addWeighted(gray, 0.4, np.zeros(gray.shape, gray.dtype), 0.6, 0.0)
-   # cv2.imshow("DarkGrey", cv2.resize(darkGrey, (800, 600)))
+    #cv2.imshow("DarkGrey", cv2.resize(darkGrey, (800, 600)))
     # HLS
     imgHLS = cv2.cvtColor(img, cv2.COLOR_BGR2HLS)
-   # cv2.imshow("imgHLS", cv2.resize(imgHLS, (800, 600)))
+    #cv2.imshow("imgHLS", cv2.resize(imgHLS, (800, 600)))
     # Yellow highlight
     HLSYellow = cv2.inRange(imgHLS, (10, 60, 60), (40, 210, 255))
-   # cv2.imshow("HLSYellow", cv2.resize(HLSYellow, (800, 600)))
+   #cv2.imshow("HLSYellow", cv2.resize(HLSYellow, (800, 600)))
     # White highlight
     HLSWhite = cv2.inRange(imgHLS, (0, 180, 0), (255, 255, 255))
    # cv2.imshow("HLSWhite", cv2.resize(HLSWhite, (800, 600)))
     # Create Mask
     mask = cv2.bitwise_or(HLSWhite, HLSYellow)
     finallyMask = cv2.bitwise_and(darkGrey, darkGrey, mask=mask)
-    #cv2.imshow("finallyMask", cv2.resize(mask, (800, 600)))
+   # cv2.imshow("finallyMask", cv2.resize(mask, (800, 600)))
 
     # GaussianBlur for Mask
     gauss = cv2.GaussianBlur(mask, (7, 7), cv2.BORDER_DEFAULT)
-    #cv2.imshow("GaussianBlur", cv2.resize(gauss, (800, 600)))
+    cv2.imshow("GaussianBlur", cv2.resize(gauss, (800, 600)))
     # Canny for GaussianBlur
     testEdges = cv2.Canny(gauss, 1, 1, apertureSize=3)
-  #  cv2.imshow('TestEdges.jpg', cv2.resize(testEdges, (800, 450)))
+    cv2.imshow('TestEdges.jpg', cv2.resize(testEdges, (800, 450)))
     # END TEST CODE
 
 
@@ -154,14 +155,19 @@ def Hand_line_detection(img):
     imported_image = cv2.cvtColor(imported_image, cv2.COLOR_BGR2RGB)
     resized_image = cv2.resize(imported_image, (800, 450))
 
+    #read saved coordinates
+    variables_file = open("variables_file.txt", "rb")
+    variables_data = pickle.load(variables_file)
+    variables_file.close()
+
     #Line Start coordinates
-    LEFT_ls = [200,20,100,830]
+    LEFT_ls = variables_data[0] #[200,20,100,830]
     LEFT_center = [((math.fabs(LEFT_ls[0]-LEFT_ls[2]))/2), (math.fabs(LEFT_ls[1]-LEFT_ls[3]))/2]
-    RIGHT_ls = [600,20,700,830]
+    RIGHT_ls = variables_data[1] #[600,20,700,830]
     RIGHT_center = [((math.fabs(RIGHT_ls[0]-RIGHT_ls[2]))/2), (math.fabs(RIGHT_ls[1]-RIGHT_ls[3]))/2]
-    UP_ls = [20,50,780,50]
+    UP_ls = variables_data[2] #[20,50,780,50]
     UP_center = [((math.fabs(UP_ls[0]-UP_ls[2]))/2), (math.fabs(UP_ls[1]-UP_ls[3]))/2]
-    DOWN_ls = [-200,350,1280,350]
+    DOWN_ls = variables_data[3] #[-200,350,1280,350]
     DOWN_center = [((math.fabs(DOWN_ls[0]-DOWN_ls[2]))/2), (math.fabs(DOWN_ls[1]-DOWN_ls[3]))/2]
 
     Line_Starts = [LEFT_ls, RIGHT_ls, UP_ls, DOWN_ls]
@@ -183,6 +189,12 @@ def Hand_line_detection(img):
         right_line = workspace.coords(LINE_name[1])
         up_line = workspace.coords(LINE_name[2])
         down_line = workspace.coords(LINE_name[3])
+
+        variables_all = (left_line, right_line, up_line, down_line)
+        variables_file = open("variables_file.txt", "wb")
+        pickle.dump(variables_all, variables_file)
+        variables_file.close()
+
         for i in range (4):
             left_line[i] = round(left_line[i] * 2.4)
             right_line[i] = round(right_line[i] * 2.4)
@@ -191,6 +203,7 @@ def Hand_line_detection(img):
         win.destroy()
         variables_all = (left_line, right_line, up_line, down_line)
         print(variables_all)
+
 
 
     #Here we have to take line start and end point and pass variables to basics code
@@ -337,7 +350,7 @@ def image_homography(img):
 
     height, width, _ = img.shape
     #find line coordinates
-    left_line, right_line, up_line, down_line =  Hand_line_detection(img) #line_detection(img)
+    left_line, right_line, up_line, down_line =   Hand_line_detection(img)#line_detection(img)
 
     # View lines
     #cv2.line(img, (right_line[0], right_line[1]), (right_line[2], right_line[3]), (0, 255, 0), 5)   #green
@@ -397,7 +410,7 @@ def image_homography(img):
 
 if __name__ == '__main__':
 
-    img = cv2.imread('../resources/dataset/BirdView/001---changzhou/north_1.jpg')
+    img = cv2.imread('../resources/dataset/BirdView/001---changzhou/west_1.jpg')
     #img = cv2.imread('../resources/dataset/BirdView/013---yancheng/west_1.jpg')
     bird_view = image_homography(img)
 
