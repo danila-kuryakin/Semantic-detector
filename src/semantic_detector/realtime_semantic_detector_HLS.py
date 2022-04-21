@@ -8,19 +8,24 @@ def nothing(x):
 
 
 if __name__ == '__main__':
-    path = '../resources/dataset/BirdView/001---changzhou/'
     # Load image
-    img = cv2.imread(path + 'north_1.jpg')
+
+    path = '../resources/dataset/BirdView/001---changzhou/'
+    fileName = path + 'north_1.jpg'
+
+    # path = '../../out/'
+    # fileName = 'h_west_1.jpg'
+
+    img = cv2.imread(fileName)
 
     # Create a window
     cv2.namedWindow('settings')
     # cv2.namedWindow('darkness')
     # cv2.namedWindow('gauss')
-    cv2.namedWindow('edges')
+    # cv2.namedWindow('edges')
+    # cv2.namedWindow('final')
 
-    cv2.namedWindow('final')
-
-    cv2.namedWindow('image')
+    # cv2.namedWindow('image')
 
     # Create trackbars for color change
     # Hue is from 0-179 for Opencv
@@ -56,12 +61,12 @@ if __name__ == '__main__':
     cv2.createTrackbar('line theta', 'settings', 1, 360, nothing)
     cv2.createTrackbar('line threshold', 'settings', 1, 500, nothing)
     cv2.createTrackbar('minLine', 'settings', 0, 200, nothing)
-    cv2.createTrackbar('maxLine', 'settings', 0, 500, nothing)
+    cv2.createTrackbar('maxLine', 'settings', 0, 200, nothing)
     cv2.setTrackbarPos('line rho', 'settings', 1)
     cv2.setTrackbarPos('line theta', 'settings', 180)
-    cv2.setTrackbarPos('line threshold', 'settings', 200)
+    cv2.setTrackbarPos('line threshold', 'settings', 50)
     cv2.setTrackbarPos('minLine', 'settings', 50)
-    cv2.setTrackbarPos('maxLine', 'settings', 200)
+    cv2.setTrackbarPos('maxLine', 'settings', 10)
 
     # Initialize
     alpha = beta = gamma = 0
@@ -116,8 +121,11 @@ if __name__ == '__main__':
         result = cv2.bitwise_and(darkGrey, darkGrey, mask=mask)
 
         gauss = cv2.GaussianBlur(result, (7, 7), cv2.BORDER_DEFAULT)
-        edges = cv2.Canny(gauss, threshold1, threshold2, apertureSize=7)
+        edges = cv2.Canny(gauss, threshold1, threshold2, apertureSize=3)
         lines = cv2.HoughLinesP(edges, line_rho, np.pi / line_theta, line_threshold, minLineLength=pMaxLineGap, maxLineGap=pMinLineLength)
+
+        dst = cv2.Canny(img, threshold1, threshold2, None, 3)
+        cdstP = cv2.cvtColor(dst, cv2.COLOR_GRAY2BGR)
 
         # Print if there is a change in HSV value
         if (pAlpha != alpha) | (pBeta != beta) | (pGamma != gamma) | (pThreshold1 != threshold1) | (pThreshold2 != threshold2) |\
@@ -145,12 +153,14 @@ if __name__ == '__main__':
             pMinLineLength = minLineLength
             pMaxLineGap = maxLineGap
 
-            img_result = numpy.array(img)
-            if(len(lines) > 0):
+            ones = np.ones(img.shape)
+            if lines is not None:
                 for line in lines:
                     x1, y1, x2, y2 = line[0]
-                    cv2.line(img_result, (x1, y1), (x2, y2), (0, 0, 255), 2)
-            cv2.imshow('image', cv2.resize(img_result, (600, 500)))
+                    cv2.line(ones, (x1, y1), (x2, y2), (0, 0, 255), 2)
+
+            cv2.imshow('ones', cv2.resize(ones, (600, 500)))
+            # cv2.imshow("Detected Lines (in red) - Probabilistic Line Transform", cv2.resize(cdstP, (600, 500)))
 
         # Display result image
         # cv2.imshow('darkness', cv2.resize(darkGrey, (400, 300)))
