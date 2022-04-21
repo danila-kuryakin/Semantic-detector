@@ -7,10 +7,10 @@ from PIL import Image, ImageTk
 import math
 import pickle
 
-# Searches for linear equation variables
-# y = kx + b
-from cv2 import CV_32F, flann
-
+#Ability to show images of all stages of the program 0/1
+DB_show_images = 0
+DB_show_ALG_lines = 0
+DB_show_FIN_lines_points = 1
 
 def find_line_equation(line):
     x1, y1, x2, y2 = line
@@ -30,79 +30,42 @@ def find_intersection_point(line_a, line_b):
 def apply_threshold(filtered):
     ret, thresh = cv2.threshold(filtered, 254, 255, cv2.THRESH_OTSU)
     plt.imshow(cv2.cvtColor(thresh, cv2.COLOR_BGR2RGB))
-    #plt.title('After applying OTSU threshold')
-    #plt.show()
     return thresh
 
 def line_detection(img):
-    height, width, _ = img.shape
-    '''
-    #cv2.imshow('img', cv2.resize(img, (800, 600)))
 
     # Convert the img to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    #cv2.imshow('gray', cv2.resize(gray, (800, 600)))
-
-    #adjust contrast
-    a = 5
-    b= -500
-    darken = cv2.addWeighted(gray, a, np.zeros(gray.shape,gray.dtype), 0, b)
-    #cv2.imshow('darken', cv2.resize(darken, (800, 600)))
-
-    # bluring image
-    Blurrr = cv2.GaussianBlur(darken,(5,5),cv2.BORDER_DEFAULT)
-    #cv2.imshow('Blurrr', cv2.resize(Blurrr, (800, 600)))
-
-    # little moooore contrast
-    a = 2
-    b = -100
-    darken2 = cv2.addWeighted(Blurrr, a, np.zeros(gray.shape, gray.dtype), 0, b)
-    #cv2.imshow('darken2', cv2.resize(darken2, (800, 600)))
-
-'''
-
-    # TEST CODE
-    #cv2.imshow("Original", cv2.resize(img, (800, 600)))
-
-    # Convert the img to grayscale
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    #cv2.imshow("Grey", cv2.resize(gray, (800, 600)))
-
     # Darkness
     darkGrey = cv2.addWeighted(gray, 0.4, np.zeros(gray.shape, gray.dtype), 0.6, 0.0)
-    #cv2.imshow("DarkGrey", cv2.resize(darkGrey, (800, 600)))
     # HLS
     imgHLS = cv2.cvtColor(img, cv2.COLOR_BGR2HLS)
-    #cv2.imshow("imgHLS", cv2.resize(imgHLS, (800, 600)))
     # Yellow highlight
     HLSYellow = cv2.inRange(imgHLS, (10, 60, 60), (40, 210, 255))
-   #cv2.imshow("HLSYellow", cv2.resize(HLSYellow, (800, 600)))
     # White highlight
     HLSWhite = cv2.inRange(imgHLS, (0, 180, 0), (255, 255, 255))
-   # cv2.imshow("HLSWhite", cv2.resize(HLSWhite, (800, 600)))
     # Create Mask
     mask = cv2.bitwise_or(HLSWhite, HLSYellow)
-    finallyMask = cv2.bitwise_and(darkGrey, darkGrey, mask=mask)
-   # cv2.imshow("finallyMask", cv2.resize(mask, (800, 600)))
-
+    # Create GrayMask
+    #finallyMask = cv2.bitwise_and(darkGrey, darkGrey, mask=mask)
     # GaussianBlur for Mask
     gauss = cv2.GaussianBlur(mask, (7, 7), cv2.BORDER_DEFAULT)
-    cv2.imshow("GaussianBlur", cv2.resize(gauss, (800, 600)))
     # Canny for GaussianBlur
     testEdges = cv2.Canny(gauss, 1, 1, apertureSize=3)
-    cv2.imshow('TestEdges.jpg', cv2.resize(testEdges, (800, 450)))
-    # END TEST CODE
 
-
-    #################
-    # Canny filter
-   # edges = cv2.Canny(testEdges, 100, 300, apertureSize=3, L2gradient =  True)
-   # cv2.imshow('edges', cv2.resize(edges, (400, 300)))
-
-    #trsh = apply_threshold(gray)####
-   # cv2.imshow('trsh', cv2.resize(trsh, (800, 600)))
+    if DB_show_images == 1 :
+        cv2.imshow("Original", cv2.resize(img, (800, 450)))
+        cv2.imshow("Gray", cv2.resize(gray, (800, 450)))
+        cv2.imshow("DarkGrey", cv2.resize(darkGrey, (800, 450)))
+        cv2.imshow("imgHLS", cv2.resize(imgHLS, (800, 450)))
+        cv2.imshow("HLSYellow", cv2.resize(HLSYellow, (800, 450)))
+        cv2.imshow("HLSWhite", cv2.resize(HLSWhite, (800, 450)))
+        cv2.imshow("mask", cv2.resize(mask, (800, 450)))
+        cv2.imshow("GaussianBlur", cv2.resize(gauss, (800, 450)))
+        cv2.imshow('TestEdges.jpg', cv2.resize(testEdges, (800, 450)))
 
     # Line detection
+    height, width, _ = img.shape
     lines = cv2.HoughLinesP(testEdges, 1, np.pi/180, 250, minLineLength=height-height//5, maxLineGap=height)
 
     left_line = [width, 0, width, height]
@@ -326,7 +289,6 @@ def Hand_line_detection(img):
     win.mainloop()
     return variables_all
 
-
 def point_detection(left_line, right_line, up_line, down_line):
     # Calculation of the equation of a straight line
     right_line_equation = find_line_equation(right_line)
@@ -342,84 +304,73 @@ def point_detection(left_line, right_line, up_line, down_line):
 
     return point_lu, point_ru, point_rd, point_ld
 
-
 def image_homography(img):
-    # TODO: remove magic
-    magic_indent1 = 100
-    magic_indent2 = 150
 
-    height, width, _ = img.shape
     #find line coordinates
-    left_line, right_line, up_line, down_line =   Hand_line_detection(img)#line_detection(img)
-
-    # View lines
-    #cv2.line(img, (right_line[0], right_line[1]), (right_line[2], right_line[3]), (0, 255, 0), 5)   #green
-    #cv2.line(img, (left_line[0], left_line[1]), (left_line[2], left_line[3]), (0, 255, 255), 5)     #yellow
-    #cv2.line(img, (down_line[0], down_line[1]), (down_line[2], down_line[3]), (255, 0, 255), 5)     #magenta
-    #cv2.line(img, (up_line[0], up_line[1]), (up_line[2], up_line[3]), (255, 0, 0), 5)               #blue
-    #cv2.imshow('img', cv2.resize(img, (800, 450)))
-
+    left_line, right_line, up_line, down_line = line_detection(img) #Hand_line_detection(img)
+    # find point coordinates
     point_lu, point_ru, point_rd, point_ld = point_detection(left_line, right_line, up_line, down_line)
 
-    # right_line_equation = find_line_equation(right_line)
-    # left_line_equation = find_line_equation(left_line)
-    # point_up = find_intersection_point(left_line_equation, right_line_equation)
-    #cv2.circle(img, point_up, 6, (255, 255, 0), -1)
-
-    # View point
-   # cv2.circle(img, point_rd, 6, (0, 0, 255), -1)
-    #cv2.circle(img, point_ru, 6, (0, 0, 255), -1)
-   # cv2.circle(img, point_ld, 6, (0, 0, 255), -1)
-   # cv2.circle(img, point_lu, 6, (0, 0, 255), -1)
+    ''' 
+    #Find left-right lines intersection
+    right_line_equation = find_line_equation(right_line)
+    left_line_equation = find_line_equation(left_line)
+    point_up = find_intersection_point(left_line_equation, right_line_equation)
+    cv2.circle(img, point_up, 6, (255, 0, 0), -1)
+    '''
 
     # TODO: remove magic
+    height, width, _ = img.shape
     # create transformation point
-    new_point_ld = point_lu[0], height - magic_indent2 #point_ld[1]
-    new_point_rd = point_ru[0], height - magic_indent2 #point_rd[1]
+    new_point_ld = point_lu[0], point_ld[1] #height - magic_indent magic_indent = 100
+    new_point_rd = point_ru[0], point_ld[1] #point_rd[1]
+    new_point_ru = point_ru[0], point_lu[1]
 
-    # View new point
-   # cv2.circle(img, new_point_ld, 6, (255, 0, 255), -1)
-    #cv2.circle(img, new_point_rd, 6, (255, 0, 255), -1)
+    # View lines and points and new point
+    if DB_show_FIN_lines_points == 1:
+        cv2.line(img, (right_line[0], right_line[1]), (right_line[2], right_line[3]), (0, 255, 0), 5)   #green
+        cv2.line(img, (left_line[0], left_line[1]), (left_line[2], left_line[3]), (0, 255, 255), 5)     #yellow
+        cv2.line(img, (down_line[0], down_line[1]), (down_line[2], down_line[3]), (255, 0, 255), 5)     #magenta
+        cv2.line(img, (up_line[0], up_line[1]), (up_line[2], up_line[3]), (255, 0, 0), 5)               #blue
+        cv2.circle(img, point_rd, 6, (0, 0, 255), -1)
+        cv2.circle(img, point_ru, 6, (0, 0, 255), -1)
+        cv2.circle(img, point_ld, 6, (0, 0, 255), -1)
+        cv2.circle(img, point_lu, 6, (0, 0, 255), -1)
+        cv2.circle(img, new_point_ld, 6, (255, 0, 255), -1)
+        cv2.circle(img, new_point_rd, 6, (255, 0, 255), -1)
 
-    #cv2.imshow('img', cv2.resize(img, (1920, 1080)))
-    # Image homography
+    # homography value 1
     img_square_corners = np.float32([point_ru, point_lu, point_ld, point_rd])
-    mnoj =1#math.fabs((point_ru[0]-point_lu[0])/(point_rd[0] -point_ld[0]))
-    #point_ru, point_lu, new_point_ld, new_point_rd = [point_ru[0]*mnoj,point_ru[1]],[point_lu[0]*mnoj,point_lu[1]],[new_point_ld[0]*mnoj,new_point_ld[1]],[new_point_rd[0]*mnoj,new_point_rd[1]]
+
+    # Reset crossway width proportions
+    mnoj = math.fabs((point_ru[0]-point_lu[0])/(point_rd[0] -point_ld[0]))
+    point_ru, point_lu, new_point_ld, new_point_rd = [new_point_ru[0]*mnoj,new_point_ru[1]],[point_lu[0]*mnoj,point_lu[1]],[new_point_ld[0]*mnoj,new_point_ld[1]],[new_point_rd[0]*mnoj,new_point_rd[1]]
+
+    # homography value 2
     img_quad_corners = np.float32([point_ru, point_lu, new_point_ld, new_point_rd])
+
+    # Image homography
     h, mask = cv2.findHomography(img_square_corners, img_quad_corners)
-
-
-
     bird_view = cv2.warpPerspective(img, h, (width, height))
-   # cv2.imshow('bird_view', cv2.resize(bird_view, (800, 450)))
 
-    M = np.float32([[1, 0, width/3],
-                    [0, 1, height/6],
-                    [0, 0, 1]])
-    bird_view_transform = cv2.warpPerspective(bird_view, M, (width, height))
-
-   # cv2.imshow('bird_view_transform', cv2.resize(bird_view_transform, (800, 450))) #!!!
+    #Crop the image
+    c = mnoj/5
+    a = int(height*(1-(mnoj-c)))
+    b = int(width*(mnoj+c))
+    cropped = bird_view[0:a, 0:b]
+    cv2.imshow('cropped', cv2.resize(cropped, (b, a)))
+    cv2.imwrite('../../out/homography.jpg', cv2.resize(cropped, (b, a), interpolation= cv2.INTER_CUBIC))
 
     # View image
-    cv2.imshow('img', cv2.resize(img, (800, 450)))
-    cv2.imshow('bird_view', cv2.resize(bird_view, (1920, 1080)))
-    #cv2.imshow('cropped_image', cv2.resize(cropped_image, (1920, 1080)))
+    cv2.imshow('Null', cv2.resize(img, (1000, 563)))
+    #cv2.imshow('bird_view', cv2.resize(bird_view, (1000, 563)))
     return bird_view
 
 
 if __name__ == '__main__':
 
-    img = cv2.imread('../resources/dataset/BirdView/001---changzhou/west_1.jpg')
-    #img = cv2.imread('../resources/dataset/BirdView/013---yancheng/west_1.jpg')
+    img = cv2.imread('../resources/dataset/BirdView/001---changzhou/north_1.jpg')
     bird_view = image_homography(img)
-
-
-   #main_image = cv2.imread('../resources/dataset/BirdView/001---changzhou/LongJin_3cm.jpg')
-   #main_img = cv2.resize(main_image, (1920, 1920))
-   #match = matching_images(bird_view, main_img)
-
-    #cv2.imwrite('../../Semantic-detector/out/linesDetected.jpg', img)
-    cv2.imwrite('../../out/homography.jpg', bird_view)
+    #cv2.imwrite('../../out/homography.jpg', cv2.resize(bird_view, (1920, 1080)))
 
     cv2.waitKey()
