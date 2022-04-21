@@ -159,6 +159,7 @@ def Hand_line_detection(img):
     variables_file = open("variables_file.txt", "rb")
     variables_data = pickle.load(variables_file)
     variables_file.close()
+    print("Readed line values from file: " + str(variables_data))
 
     #Line Start coordinates
     LEFT_ls = variables_data[0] #[200,20,100,830]
