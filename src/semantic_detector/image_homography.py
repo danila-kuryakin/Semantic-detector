@@ -35,7 +35,7 @@ def apply_threshold(filtered):
 
 def line_detection(img):
     height, width, _ = img.shape
-
+    '''
     #cv2.imshow('img', cv2.resize(img, (800, 600)))
 
     # Convert the img to grayscale
@@ -58,17 +58,51 @@ def line_detection(img):
     darken2 = cv2.addWeighted(Blurrr, a, np.zeros(gray.shape, gray.dtype), 0, b)
     #cv2.imshow('darken2', cv2.resize(darken2, (800, 600)))
 
+'''
+
+    # TEST CODE
+   # cv2.imshow("Original", cv2.resize(img, (800, 600)))
+
+    # Convert the img to grayscale
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+   # cv2.imshow("Grey", cv2.resize(gray, (800, 600)))
+
+    # Darkness
+    darkGrey = cv2.addWeighted(gray, 0.4, np.zeros(gray.shape, gray.dtype), 0.6, 0.0)
+   # cv2.imshow("DarkGrey", cv2.resize(darkGrey, (800, 600)))
+    # HLS
+    imgHLS = cv2.cvtColor(img, cv2.COLOR_BGR2HLS)
+   # cv2.imshow("imgHLS", cv2.resize(imgHLS, (800, 600)))
+    # Yellow highlight
+    HLSYellow = cv2.inRange(imgHLS, (10, 60, 60), (40, 210, 255))
+   # cv2.imshow("HLSYellow", cv2.resize(HLSYellow, (800, 600)))
+    # White highlight
+    HLSWhite = cv2.inRange(imgHLS, (0, 180, 0), (255, 255, 255))
+   # cv2.imshow("HLSWhite", cv2.resize(HLSWhite, (800, 600)))
+    # Create Mask
+    mask = cv2.bitwise_or(HLSWhite, HLSYellow)
+    finallyMask = cv2.bitwise_and(darkGrey, darkGrey, mask=mask)
+    #cv2.imshow("finallyMask", cv2.resize(mask, (800, 600)))
+
+    # GaussianBlur for Mask
+    gauss = cv2.GaussianBlur(mask, (7, 7), cv2.BORDER_DEFAULT)
+    #cv2.imshow("GaussianBlur", cv2.resize(gauss, (800, 600)))
+    # Canny for GaussianBlur
+    testEdges = cv2.Canny(gauss, 1, 1, apertureSize=3)
+  #  cv2.imshow('TestEdges.jpg', cv2.resize(testEdges, (800, 450)))
+    # END TEST CODE
+
 
     #################
     # Canny filter
-    edges = cv2.Canny(darken2, 100, 300, apertureSize=3)
-    cv2.imshow('edges', cv2.resize(edges, (400, 300)))
+   # edges = cv2.Canny(testEdges, 100, 300, apertureSize=3, L2gradient =  True)
+   # cv2.imshow('edges', cv2.resize(edges, (400, 300)))
 
     #trsh = apply_threshold(gray)####
    # cv2.imshow('trsh', cv2.resize(trsh, (800, 600)))
 
     # Line detection
-    lines = cv2.HoughLinesP(edges, 1, np.pi/180, 250, minLineLength=height-height//5, maxLineGap=height)
+    lines = cv2.HoughLinesP(testEdges, 1, np.pi/180, 250, minLineLength=height-height//5, maxLineGap=height)
 
     left_line = [width, 0, width, height]
     right_line = [0, 0, 0, height]
@@ -81,14 +115,14 @@ def line_detection(img):
         # Classification vertical lines
         if y2 > height-height//4 and y1 < height//4:
             # View lines
-          #  cv2.line(img, (x1, y1), (x2, y2), (0, 0, 150), 1)
+            #cv2.line(img, (x1, y1), (x2, y2), (0, 0, 150), 3)
 
-            if x2 > right_line[2]:
+            if x2 > right_line[2]: #x1 not Used
                 right_line = [x1, y1, x2, y2]
             continue
         if y1 > height-height//4 and y2 < height//4:
             # View lines
-        #    cv2.line(img, (x2, y2), (x1, y1), (0, 150, 150), 1)
+            #cv2.line(img, (x2, y2), (x1, y1), (0, 150, 150), 3)
 
             if x1 < left_line[2]:
                 left_line = [x2, y2, x1, y1]
@@ -105,7 +139,7 @@ def line_detection(img):
 
     # TODO: bad idea
     # Find up line
-    up_line = (down_line[0], down_line[1]-20 - height // 2, down_line[2], down_line[3]-20 - height // 2)# start_width start_heigh end_width end_heigh
+    up_line = (down_line[0], down_line[1]+150 - height // 2, down_line[2], down_line[3]+150 - height // 2)# start_width start_heigh end_width end_heigh
 
     return left_line, right_line, up_line, down_line
 
@@ -121,13 +155,13 @@ def Hand_line_detection(img):
     resized_image = cv2.resize(imported_image, (800, 450))
 
     #Line Start coordinates
-    LEFT_ls = [200,20,100,430]
+    LEFT_ls = [200,20,100,830]
     LEFT_center = [((math.fabs(LEFT_ls[0]-LEFT_ls[2]))/2), (math.fabs(LEFT_ls[1]-LEFT_ls[3]))/2]
-    RIGHT_ls = [600,20,700,430]
+    RIGHT_ls = [600,20,700,830]
     RIGHT_center = [((math.fabs(RIGHT_ls[0]-RIGHT_ls[2]))/2), (math.fabs(RIGHT_ls[1]-RIGHT_ls[3]))/2]
     UP_ls = [20,50,780,50]
     UP_center = [((math.fabs(UP_ls[0]-UP_ls[2]))/2), (math.fabs(UP_ls[1]-UP_ls[3]))/2]
-    DOWN_ls = [20,350,780,350]
+    DOWN_ls = [-200,350,1280,350]
     DOWN_center = [((math.fabs(DOWN_ls[0]-DOWN_ls[2]))/2), (math.fabs(DOWN_ls[1]-DOWN_ls[3]))/2]
 
     Line_Starts = [LEFT_ls, RIGHT_ls, UP_ls, DOWN_ls]
@@ -194,16 +228,16 @@ def Hand_line_detection(img):
     image = workspace.create_image(0, 0, anchor='nw',image=imgtk)
 
     #Add lines in canvas
-    LEFT_line = workspace.create_line(LEFT_ls, fill="#0AB6FF", width=5,
+    LEFT_line = workspace.create_line(LEFT_ls, fill="#0AB6FF", width=2,
                           activefill = '#FF00D4',
                           )
-    RIGHT_line = workspace.create_line(RIGHT_ls, fill="#26ff1f", width=5,
+    RIGHT_line = workspace.create_line(RIGHT_ls, fill="#26ff1f", width=2,
                           activefill = '#FF00D4'
                           )
-    UP_line = workspace.create_line(UP_ls, fill="#F8FF24", width=5,
+    UP_line = workspace.create_line(UP_ls, fill="#F8FF24", width=2,
                           activefill = '#FF00D4'
                           )
-    DOWN_line = workspace.create_line(DOWN_ls, fill="#F56A00", width=5,
+    DOWN_line = workspace.create_line(DOWN_ls, fill="#F56A00", width=2,
                           activefill = '#FF00D4'
                           )
     LINE_name = [LEFT_line, RIGHT_line, UP_line, DOWN_line]
@@ -255,11 +289,11 @@ def Hand_line_detection(img):
 
         #Switch rotation speed
         if event.char == "1":
-            rotation_speed=0.5
+            rotation_speed=0.2
         elif event.char == "2":
-            rotation_speed=3
+            rotation_speed=1
         elif event.char == "3":
-            rotation_speed=7
+            rotation_speed=5
         else:
             return 0
         #print(event.char)
@@ -298,83 +332,73 @@ def point_detection(left_line, right_line, up_line, down_line):
 
 def image_homography(img):
     # TODO: remove magic
-    magic_indent = 150
+    magic_indent1 = 100
+    magic_indent2 = 150
 
     height, width, _ = img.shape
-
-    left_line, right_line, up_line, down_line = Hand_line_detection(img) #line_detection(img)
+    #find line coordinates
+    left_line, right_line, up_line, down_line =  Hand_line_detection(img) #line_detection(img)
 
     # View lines
-    cv2.line(img, (right_line[0], right_line[1]), (right_line[2], right_line[3]), (0, 255, 0), 2)   #green
-    cv2.line(img, (left_line[0], left_line[1]), (left_line[2], left_line[3]), (0, 255, 255), 2)     #yellow
-    cv2.line(img, (down_line[0], down_line[1]), (down_line[2], down_line[3]), (255, 0, 255), 2)     #magenta
-    cv2.line(img, (up_line[0], up_line[1]), (up_line[2], up_line[3]), (255, 0, 0), 2)               #blue
+    #cv2.line(img, (right_line[0], right_line[1]), (right_line[2], right_line[3]), (0, 255, 0), 5)   #green
+    #cv2.line(img, (left_line[0], left_line[1]), (left_line[2], left_line[3]), (0, 255, 255), 5)     #yellow
+    #cv2.line(img, (down_line[0], down_line[1]), (down_line[2], down_line[3]), (255, 0, 255), 5)     #magenta
+    #cv2.line(img, (up_line[0], up_line[1]), (up_line[2], up_line[3]), (255, 0, 0), 5)               #blue
+    #cv2.imshow('img', cv2.resize(img, (800, 450)))
 
     point_lu, point_ru, point_rd, point_ld = point_detection(left_line, right_line, up_line, down_line)
 
+    # right_line_equation = find_line_equation(right_line)
+    # left_line_equation = find_line_equation(left_line)
+    # point_up = find_intersection_point(left_line_equation, right_line_equation)
+    #cv2.circle(img, point_up, 6, (255, 255, 0), -1)
+
     # View point
-    #cv2.circle(img, point_rd, 6, (0, 0, 255), -1)
+   # cv2.circle(img, point_rd, 6, (0, 0, 255), -1)
     #cv2.circle(img, point_ru, 6, (0, 0, 255), -1)
-    #cv2.circle(img, point_ld, 6, (0, 0, 255), -1)
-    #v2.circle(img, point_lu, 6, (0, 0, 255), -1)
+   # cv2.circle(img, point_ld, 6, (0, 0, 255), -1)
+   # cv2.circle(img, point_lu, 6, (0, 0, 255), -1)
 
     # TODO: remove magic
     # create transformation point
-    new_point_ld = point_lu[0], height - magic_indent
-    new_point_rd = point_ru[0], height - magic_indent
+    new_point_ld = point_lu[0], height - magic_indent2 #point_ld[1]
+    new_point_rd = point_ru[0], height - magic_indent2 #point_rd[1]
 
     # View new point
-    # cv2.circle(img, new_point_ld, 6, (255, 0, 255), -1)
-    # cv2.circle(img, new_point_rd, 6, (255, 0, 255), -1)
+   # cv2.circle(img, new_point_ld, 6, (255, 0, 255), -1)
+    #cv2.circle(img, new_point_rd, 6, (255, 0, 255), -1)
 
+    #cv2.imshow('img', cv2.resize(img, (1920, 1080)))
     # Image homography
     img_square_corners = np.float32([point_ru, point_lu, point_ld, point_rd])
+    mnoj =1#math.fabs((point_ru[0]-point_lu[0])/(point_rd[0] -point_ld[0]))
+    #point_ru, point_lu, new_point_ld, new_point_rd = [point_ru[0]*mnoj,point_ru[1]],[point_lu[0]*mnoj,point_lu[1]],[new_point_ld[0]*mnoj,new_point_ld[1]],[new_point_rd[0]*mnoj,new_point_rd[1]]
     img_quad_corners = np.float32([point_ru, point_lu, new_point_ld, new_point_rd])
     h, mask = cv2.findHomography(img_square_corners, img_quad_corners)
 
 
 
     bird_view = cv2.warpPerspective(img, h, (width, height))
+   # cv2.imshow('bird_view', cv2.resize(bird_view, (800, 450)))
 
-    size_2 = (height * 2, width * 2)
-    resize = cv2.resize(bird_view, size_2, interpolation=cv2.INTER_AREA)
-    cropped_image = resize[size_2[0]//2:size_2[0]*2, size_2[1]//20:size_2[1]*2]
+    M = np.float32([[1, 0, width/3],
+                    [0, 1, height/6],
+                    [0, 0, 1]])
+    bird_view_transform = cv2.warpPerspective(bird_view, M, (width, height))
+
+   # cv2.imshow('bird_view_transform', cv2.resize(bird_view_transform, (800, 450))) #!!!
 
     # View image
-    cv2.imshow('img', cv2.resize(img, (800, 600)))
+    cv2.imshow('img', cv2.resize(img, (800, 450)))
     cv2.imshow('bird_view', cv2.resize(bird_view, (1920, 1080)))
     #cv2.imshow('cropped_image', cv2.resize(cropped_image, (1920, 1080)))
     return bird_view
 
-##not working
-def matching_images(camera_img, main_img) :
-
-    #https://habr.com/ru/post/516116/
-    #Scale-Invariant Feature Transform creation
-    sift = cv2.SIFT_create()
-
-    kp1, descriptors1 = sift.detectAndCompute(camera_img, None)
-    kp2, descriptors2 = sift.detectAndCompute(main_img, None)
-    img = cv2.drawKeypoints(camera_img, kp1, camera_img)
-    img1 = cv2.drawKeypoints(main_img, kp2, main_img)
-    #cv2.imshow('camera_img', cv2.resize(camera_img, (1920, 1080)))
-    #cv2.imshow('main_img', cv2.resize(img1, (1080, 1080)))
-
-    index_params = dict(algorithm=2, trees=5)
-    search_params = dict()
-    flann = cv2.FlannBasedMatcher(index_params, search_params)
-
-
-
-
-    result = camera_img
-    return result
-
 
 if __name__ == '__main__':
 
-    #img = cv2.imread('../resources/dataset/BirdView/010---rongguixinma/south_1.jpg')
-    img = cv2.imread('../resources/dataset/BirdView/013---yancheng/west_1.jpg')
+    img = cv2.imread('../resources/dataset/BirdView/001---changzhou/north_1.jpg')
+    #img = cv2.imread('../resources/dataset/BirdView/013---yancheng/west_1.jpg')
     bird_view = image_homography(img)
 
 
