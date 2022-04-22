@@ -5,7 +5,7 @@ import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
 import math
-import pickle
+
 
 #Ability to show images of all stages of the program 0/1
 DB_show_images = 0
@@ -112,7 +112,6 @@ def line_detection(img):
             if  skew_down < skew_error:
                 down_line[1] = int(down_line[1] + skew_down // 2)
                 down_line[3] = int(down_line[3] - skew_down // 2)
-
             continue
 
         # Classification up line
@@ -127,7 +126,6 @@ def line_detection(img):
                 up_line[1]  = y1
             if y2 > up_line[3] and math.fabs(up_line[1]-up_line[3])<skew_threshold:
                 up_line[3] = y2
-
             continue
 
 
