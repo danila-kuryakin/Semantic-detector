@@ -10,7 +10,9 @@ import pickle
 #Ability to show images of all stages of the program 0/1
 DB_show_images = 0
 DB_show_ALG_lines = 0
+DB_show_ALG_lines_ALL =0
 DB_show_FIN_lines_points = 1
+
 
 def find_line_equation(line):
     x1, y1, x2, y2 = line
@@ -64,48 +66,77 @@ def line_detection(img):
         cv2.imshow("GaussianBlur", cv2.resize(gauss, (800, 450)))
         cv2.imshow('TestEdges.jpg', cv2.resize(testEdges, (800, 450)))
 
+
+
     # Line detection
     height, width, _ = img.shape
-    lines = cv2.HoughLinesP(testEdges, 1, np.pi/180, 250, minLineLength=height-height//5, maxLineGap=height)
-
-    left_line = [width, 0, width, height]
-    right_line = [0, 0, 0, height]
-
-    down_line = [0, height, width, height]
+    lines = cv2.HoughLinesP(testEdges, 2, np.pi/180, 250, minLineLength=height-height//5, maxLineGap=height)
+    left_line   = [width, 0, width, height]
+    right_line  = [0, 0, 0, height]
+    up_line     = [0, 0, width, 0]
+    down_line   = [0, height, width, height]
 
     for line in lines:
 
         x1, y1, x2, y2 = line[0]
+        # View all lines
+        cv2.line(img, (x1, y1), (x2, y2), (255, 255, 0), 1) if DB_show_ALG_lines_ALL == 1 else 0
+
         # Classification vertical lines
         if y2 > height-height//4 and y1 < height//4:
             # View lines
-            #cv2.line(img, (x1, y1), (x2, y2), (0, 0, 150), 3)
+            cv2.line(img, (x1, y1), (x2, y2), (0, 0, 150), 3) if DB_show_ALG_lines == 1 else 0
 
             if x2 > right_line[2]: #x1 not Used
                 right_line = [x1, y1, x2, y2]
             continue
+
         if y1 > height-height//4 and y2 < height//4:
             # View lines
-            #cv2.line(img, (x2, y2), (x1, y1), (0, 150, 150), 3)
+            cv2.line(img, (x2, y2), (x1, y1), (0, 150, 150), 3) if DB_show_ALG_lines == 1 else 0
 
             if x1 < left_line[2]:
                 left_line = [x2, y2, x1, y1]
             continue
 
-        # TODO: redo please
-        # Classification horizontal lines
-        if y1 > height//2 and y2 > height//2:
+
+        # Classification down line
+        if y1 > height - height//2.3 and y2 > height - height//2.3: # нужно вынести как переменные масштабирование
             # View lines
-         #   cv2.line(img, (x1, y1), (x2, y2), ( 150, 0,0), 1)
+            cv2.line(img, (x1, y1), (x2, y2), ( 150, 0,0), 1) if DB_show_ALG_lines == 1 else 0
+
+            skew_error = 100  # ошибка поворота когда линия слишком широкая и с одной стороны видно верх а с другой низ, выбираем среднее
             if y1 < down_line[1] and y2 < down_line[3]:
                 down_line = [x1, y1, x2, y2]
+            skew_down = math.fabs(down_line[1]-down_line[3])
+            if  skew_down < skew_error:
+                down_line[1] = int(down_line[1] + skew_down // 2)
+                down_line[3] = int(down_line[3] - skew_down // 2)
+
             continue
+
+        # Classification up line
+        if y1 < height // 4 and y2 < height // 4: # нужно вынести как переменные масштабирование
+            # View lines
+            cv2.line(img, (x1, y1), (x2, y2), (150, 0, 150), 1) if DB_show_ALG_lines == 1 else 0
+
+            skew_threshold = 100 #пытаемся найти самую нижнюю линию, если наклон по одной из сторон меньше порогового значения
+            if y1 > up_line[1] and y2 > up_line[3]:
+                up_line = [x1, y1, x2, y2]
+            if y1 > up_line[1] and math.fabs(up_line[1]-up_line[3])<skew_threshold:
+                up_line[1]  = y1
+            if y2 > up_line[3] and math.fabs(up_line[1]-up_line[3])<skew_threshold:
+                up_line[3] = y2
+            continue
+
 
     # TODO: bad idea
     # Find up line
-    up_line = (down_line[0], down_line[1]+150 - height // 2, down_line[2], down_line[3]+150 - height // 2)# start_width start_heigh end_width end_heigh
+    #up_line = (down_line[0], down_line[1]+150 - height // 2, down_line[2], down_line[3]+150 - height // 2)# start_width start_heigh end_width end_heigh
 
     return left_line, right_line, up_line, down_line
+
+
 
 def Hand_line_detection(img):
     global zero_angle
@@ -352,6 +383,7 @@ def image_homography(img):
     # Image homography
     h, mask = cv2.findHomography(img_square_corners, img_quad_corners)
     bird_view = cv2.warpPerspective(img, h, (width, height))
+    cv2.imshow('bird_view', cv2.resize(bird_view, (1000, 563))) if DB_show_images == 1 else 0
 
     #Crop the image
     c = mnoj/5
@@ -363,13 +395,12 @@ def image_homography(img):
 
     # View image
     cv2.imshow('Null', cv2.resize(img, (1000, 563)))
-    #cv2.imshow('bird_view', cv2.resize(bird_view, (1000, 563)))
     return bird_view
 
 
 if __name__ == '__main__':
 
-    img = cv2.imread('../resources/dataset/BirdView/001---changzhou/north_1.jpg')
+    img = cv2.imread('../resources/dataset/BirdView/004---jinchang/east_1.jpg')
     bird_view = image_homography(img)
     #cv2.imwrite('../../out/homography.jpg', cv2.resize(bird_view, (1920, 1080)))
 
