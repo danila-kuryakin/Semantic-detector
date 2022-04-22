@@ -127,6 +127,7 @@ def line_detection(img):
                 up_line[1]  = y1
             if y2 > up_line[3] and math.fabs(up_line[1]-up_line[3])<skew_threshold:
                 up_line[3] = y2
+
             continue
 
 
