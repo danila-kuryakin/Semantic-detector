@@ -16,3 +16,4 @@ if __name__ == '__main__':
     plt.title(titles[i])
     plt.xticks([]), plt.yticks([])
   plt.show()
+
