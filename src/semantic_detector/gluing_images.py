@@ -64,8 +64,8 @@ def bf_matching(img1, img2):
 if __name__ == '__main__':
   # FLANN MATCH FASTER THEN BRUTE FORCE, BUT WORSE. WE CAN PLAY WITH IT IN FUTURE.
 
-  image = cv2.imread('../resources/dataset/BirdView/013---yancheng/north.jpg')
-  image2 = cv2.imread('../resources/dataset/BirdView/013---yancheng/south.jpg')
+  image = cv2.imread('../resources/dataset/BirdView/001---changzhou/south_1.jpg')
+  image2 = cv2.imread('../resources/dataset/BirdView/001---changzhou/south_2.jpg')
   image = imutils.rotate(image, angle=180)
   flann_matching(image, image2)
 

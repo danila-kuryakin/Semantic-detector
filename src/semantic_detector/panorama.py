@@ -7,8 +7,12 @@ from matplotlib import pyplot as plt
 if __name__ == '__main__':
   start_time = time.time()
   top, bot, left, right = 100, 100, 0, 500
-  img1 = cv2.imread('../resources/dataset/BirdView/013---yancheng/north.jpg')
-  img2 = cv2.imread('../resources/dataset/BirdView/013---yancheng/south.jpg')
+  img1 = cv2.imread('../resources/dataset/BirdView/011---taiyuan/west+east.jpg')
+  img2 = cv2.imread('../resources/dataset/BirdView/011---taiyuan/west+east2.jpg')
+
+  # img1 = imutils.rotate(img1, angle=-90)
+  img2 = imutils.rotate(img2, angle=180)
+
 
   srcImg = cv2.copyMakeBorder(img1, top, bot, left, right, cv2.BORDER_CONSTANT, value=(0, 0, 0))
   testImg = cv2.copyMakeBorder(img2, top, bot, left, right, cv2.BORDER_CONSTANT, value=(0, 0, 0))
@@ -35,7 +39,7 @@ if __name__ == '__main__':
   pts2 = []
   # ratio test as per Lowe's paper
   for i, (m, n) in enumerate(matches):
-    if m.distance < 0.7 * n.distance:
+    if m.distance < 0.6 * n.distance:
       good.append(m)
       pts2.append(kp2[m.trainIdx].pt)
       pts1.append(kp1[m.queryIdx].pt)
@@ -81,7 +85,7 @@ if __name__ == '__main__':
 
     # opencv is bgr, matplotlib is rgb
     cv2.imshow('flann_result', cv2.resize(res, (1200, 900)))
-    cv2.imwrite('../../out/result.jpg', res)
+    cv2.imwrite('../../out/west+east.jpg', res)
     end_time = time.time()
     print(end_time - start_time)
     cv2.waitKey()
