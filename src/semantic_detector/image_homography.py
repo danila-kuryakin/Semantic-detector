@@ -10,7 +10,7 @@ import math
 #Ability to show images of all stages of the program 0/1
 DB_show_images = 0
 DB_show_ALG_lines = 0
-DB_show_ALG_lines_ALL =0
+DB_show_ALG_lines_ALL = 1
 DB_show_FIN_lines_points = 1
 
 
@@ -101,7 +101,7 @@ def line_detection(img):
 
 
         # Classification down line
-        if y1 > height - height//2.3 and y2 > height - height//2.3: # нужно вынести как переменные масштабирование
+        if y1 > height - height//2 and y2 > height - height//2: # нужно вынести как переменные масштабирование
             # View lines
             cv2.line(img, (x1, y1), (x2, y2), ( 150, 0,0), 1) if DB_show_ALG_lines == 1 else 0
 
@@ -115,7 +115,7 @@ def line_detection(img):
             continue
 
         # Classification up line
-        if y1 < height // 4 and y2 < height // 4: # нужно вынести как переменные масштабирование
+        if y1 < height // 3.7 and y2 < height // 3.7 : # нужно вынести как переменные масштабирование
             # View lines
             cv2.line(img, (x1, y1), (x2, y2), (150, 0, 150), 1) if DB_show_ALG_lines == 1 else 0
 
@@ -373,7 +373,7 @@ def image_homography(img):
     img_square_corners = np.float32([point_ru, point_lu, point_ld, point_rd])
 
     # Reset crossway width proportions
-    mnoj = math.fabs((point_ru[0]-point_lu[0])/(point_rd[0] -point_ld[0]))
+    mnoj = math.fabs((point_ru[0]-point_lu[0])/(point_rd[0] -point_ld[0]))*0.8
     point_ru, point_lu, new_point_ld, new_point_rd = [new_point_ru[0]*mnoj,new_point_ru[1]],[point_lu[0]*mnoj,point_lu[1]],[new_point_ld[0]*mnoj,new_point_ld[1]],[new_point_rd[0]*mnoj,new_point_rd[1]]
 
     # homography value 2
@@ -399,7 +399,7 @@ def image_homography(img):
 
 if __name__ == '__main__':
 
-    img = cv2.imread('../resources/dataset/BirdView/004---jinchang/east_1.jpg')
+    img = cv2.imread('../resources/dataset/BirdView/008---lean/west_1.jpg')
     bird_view = image_homography(img)
     #cv2.imwrite('../../out/homography.jpg', cv2.resize(bird_view, (1920, 1080)))
 
