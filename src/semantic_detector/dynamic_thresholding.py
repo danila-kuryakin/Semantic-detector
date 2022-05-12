@@ -48,13 +48,14 @@ def dynamic_thresholding(img):
                     continue
             cv2.line(ones, (x1, y1), (x2, y2), (0, 0, 255), 2, cv2.LINE_AA)
 
-    cv2.imshow('image', cv2.resize(th3, (600, 500)))
+    cv2.imshow('Dynamic_thresholding', cv2.resize(th3, (400, 300)))
     cv2.imshow("Canny", cv2.resize(cdstP, (400, 300)))
     cv2.imshow("Lines", cv2.resize(ones, (600, 500)))
 
 
 if __name__ == '__main__':
     path = '../resources/dataset/BirdView/001---changzhou/south_1.jpg'
+    # path = '../resources/dataset/crossroad3_with_sun/camera6_right.png'
 
     img = cv2.imread(path)
     dynamic_thresholding(img)
