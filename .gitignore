@@ -134,3 +134,7 @@ dmypy.json
 # Dataset
 out/
 src/resources
+/2022-04-22_005847.png
+/src/Datasets.pdf
+/src/semantic_detector/data_file_1.json
+/src/semantic_detector/data_file_0.json

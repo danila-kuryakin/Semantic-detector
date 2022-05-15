@@ -5,6 +5,7 @@ import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
 import math
+import pickle
 
 
 #Ability to show images of all stages of the program 0/1
