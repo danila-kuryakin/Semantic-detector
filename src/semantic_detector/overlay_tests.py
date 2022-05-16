@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import imutils
 
-DB_show_square_lines = 0
+DB_show_square_lines = 1
 DB_show_img = 0
 DB_merge_img = 0
 
@@ -49,13 +49,13 @@ def image_square(img_4_cut, img_N, img_S, img_W, img_E):
     # cv2.imshow('mask2', mask2)
     # cv2.imshow('img1', np.uint8(img_N_sq * mask1))
     # cv2.imshow('img2', np.uint8(img_S_sq * mask2))
-    # cv2.imshow('N_S', N_S)
+    #cv2.imshow('N_S', N_S)
     mask3 = imutils.rotate(mask1, 90)
     mask4 = imutils.rotate(mask2, 90)
     img_W_sq = img_W[sq_Y_0:sq_Y_1, sq_X_0:sq_X_1]
     img_E_sq = img_E[sq_Y_0:sq_Y_1, sq_X_0:sq_X_1]
     W_E = np.uint8(img_W_sq * mask1 + img_E_sq * mask2)
-    # cv2.imshow('W_E', W_E)
+    #cv2.imshow('W_E', W_E)
     dst = cv2.addWeighted(N_S, 0.5, W_E, 0.5, 0)
     # cv2.imshow('dst', dst)
     merged_center = merge_base_images(img_4_cut, dst, "square")
@@ -158,13 +158,13 @@ def image_slitching(img_null, img_N, img_S, img_W, img_E):
 
 
 if __name__ == '__main__':
-    img_null = cv2.imread('../../out/13/PS/null.jpg')
-    img_N = cv2.imread('../../out/13/PS/N_PS.jpg')
-    img_S = cv2.imread('../../out/13/PS/S_PS.jpg')
-    img_W = cv2.imread('../../out/13/PS/W_PS.jpg')
-    img_E = cv2.imread('../../out/13/PS/E_PS.jpg')
+    img_null = cv2.imread('../../out/5/PS/null.jpg')
+    img_N = cv2.imread('../../out/5/PS/N_PS.jpg')
+    img_S = cv2.imread('../../out/5/PS/S_PS.jpg')
+    img_W = cv2.imread('../../out/5/PS/W_PS.jpg')
+    img_E = cv2.imread('../../out/5/PS/E_PS.jpg')
 
-    # need to change default bg color to gray for improve color overlaying
+
     bg_merge = image_bg(img_null, img_N, img_S, img_W, img_E)
 
     img_4_cut = image_slitching(bg_merge, img_N, img_S, img_W, img_E)
@@ -173,3 +173,10 @@ if __name__ == '__main__':
     cv2.imshow('img_center', cv2.resize(img_center, (1280, 720)))
 
     cv2.waitKey()
+
+#NB
+# need to change default bg color to gray for improve color overlaying
+#
+# центр можно сделать лучще если выбирать не усреднение с каждой стороны а усреднение
+# половины центра с каждой стороны ведущего изображения(н/р со стороны слева брать левый верх градиентом,
+# сверху правую вертикальную половину градиенгтом и тд
