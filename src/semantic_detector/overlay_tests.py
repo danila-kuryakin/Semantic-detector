@@ -19,6 +19,24 @@ sq_Y_1 = sq_Y_0 + square_size
 # sq_cd_DN_LEFT = (sq_X_0, sq_Y_1)
 # sq_cd_DN_RIGHT = (sq_X_1, sq_Y_1)
 
+# рисуем недостающие зоны
+def image_bg(img_ver, img_N, img_S, img_W, img_E):
+    mask1 = np.repeat(np.tile(np.linspace(0, 1, img_N.shape[1]), (img_N.shape[0], 1))[:, :, np.newaxis], 3, axis=2)
+    mask2 = imutils.rotate(mask1, 180)
+    W_E = np.uint8(img_W * mask1 + img_E * mask2) #swap mask1 and mask2 to change start line
+    #cv2.imshow('W_E', cv2.resize(W_E, (1280, 720)))
+
+    mask3 = cv2.resize((imutils.rotate_bound(mask2, 90)), (1920,1080))
+    mask4 = imutils.rotate_bound(mask3, 180)
+    N_S = np.uint8(img_N * mask4 + img_S * mask3) #swap mask3 and mask4 to change start line
+    #cv2.imshow('N_S', cv2.resize(N_S, (1280, 720)))
+    # cv2.imshow('mask4', cv2.resize(mask4, (1280, 720)))
+    # cv2.imshow('mask3', cv2.resize(mask3, (1280, 720)))
+    dst = cv2.addWeighted(N_S, 0.5, W_E, 0.5, 0)
+    cv2.imshow('dst', cv2.resize(dst, (1280, 720)))
+    return dst
+
+
 # добавляем центр к перекрестку
 def image_square(img_4_cut, img_N, img_S, img_W, img_E):
     blk = np.zeros((601, 601, 3), np.uint8)
@@ -39,7 +57,7 @@ def image_square(img_4_cut, img_N, img_S, img_W, img_E):
     W_E = np.uint8(img_W_sq * mask1 + img_E_sq * mask2)
     # cv2.imshow('W_E', W_E)
     dst = cv2.addWeighted(N_S, 0.5, W_E, 0.5, 0)
-    #cv2.imshow('dst', dst)
+    # cv2.imshow('dst', dst)
     merged_center = merge_base_images(img_4_cut, dst, "square")
     # cv2.imshow('merged_center', merged_center)
     return merged_center
@@ -81,7 +99,7 @@ def merge_base_images(null_img, merging_img, type):
     cv2.imshow('cut_n', cut_n) if DB_merge_img == 1 else 0
 
     img2gray = cv2.cvtColor(merging_img, cv2.COLOR_BGR2GRAY)
-    ret, mask = cv2.threshold(img2gray, 5, 255, cv2.THRESH_BINARY_INV)  # | cv2.THRESH_OTSU
+    ret, mask = cv2.threshold(img2gray, 30, 255, cv2.THRESH_BINARY_INV)  # | cv2.THRESH_OTSU
     cv2.imshow('mask', mask) if DB_merge_img == 1 else 0
     # blurred = cv2.GaussianBlur(mask, (7, 7), 0)
     # cv2.imshow('blurred', blurred) if DB_merge_img == 1 else 0
@@ -141,12 +159,15 @@ def image_slitching(img_null, img_N, img_S, img_W, img_E):
 
 if __name__ == '__main__':
     img_null = cv2.imread('../../out/13/PS/null.jpg')
-    img_N = cv2.imread('../../out/13/PS/N_PS.png')
-    img_S = cv2.imread('../../out/13/PS/S_PS.png')
-    img_W = cv2.imread('../../out/13/PS/W_PS.png')
-    img_E = cv2.imread('../../out/13/PS/E_PS.png')
+    img_N = cv2.imread('../../out/13/PS/N_PS.jpg')
+    img_S = cv2.imread('../../out/13/PS/S_PS.jpg')
+    img_W = cv2.imread('../../out/13/PS/W_PS.jpg')
+    img_E = cv2.imread('../../out/13/PS/E_PS.jpg')
 
-    img_4_cut = image_slitching(img_null, img_N, img_S, img_W, img_E)
+    # need to change default bg color to gray for improve color overlaying
+    bg_merge = image_bg(img_null, img_N, img_S, img_W, img_E)
+
+    img_4_cut = image_slitching(bg_merge, img_N, img_S, img_W, img_E)
     img_center = image_square(img_4_cut, img_N, img_S, img_W, img_E)
 
     cv2.imshow('img_center', cv2.resize(img_center, (1280, 720)))
