@@ -1,12 +1,27 @@
+from math import atan2
+
 import cv2
 import numpy
 import numpy as np
 
 
+def bubble_sort(nums):
+    # We set swapped to True so the loop looks runs at least once
+    swapped = True
+    while swapped:
+        swapped = False
+        for i in range(len(nums) - 1):
+            if nums[i] > nums[i + 1]:
+                # Swap the elements
+                nums[i], nums[i + 1] = nums[i + 1], nums[i]
+                # Set the flag to True so we'll loop again
+                swapped = True
+    return nums
+
 # path = '../resources/dataset/BirdView/001---changzhou/'
 # file_name = 'south_1.jpg'
 
-path = '../../out/'
+path = '../../../out/'
 file_name = 'h_west_1.jpg'
 
 # path = '../resources/'
@@ -38,7 +53,7 @@ contours, hier = cv2.findContours(thresh.copy(),
 boxs = []
 for c in contours:
     # if the contour is not sufficiently large, ignore it
-    if cv2.contourArea(c) < 50 or cv2.contourArea(c) > 3000:
+    if cv2.contourArea(c) < 150 or cv2.contourArea(c) > 3000:
         continue
 
     # get the min area rect
@@ -46,8 +61,18 @@ for c in contours:
     box = cv2.boxPoints(rect)
     # convert all coordinates floating point values to int
     box = np.int0(box)
-    boxs.append(box)
 
+    # x, y, _ = img.shape
+    # newBox = []
+    # for coord in box:
+    #     if coord[0] < x:
+    #         newBox.insert(0, coord)
+    #         x = coord[0]
+    #     else:
+    #         newBox.append(coord)
+    #         x = newBox[0][0]
+    # boxs.append(newBox)
+    print(box)
     cv2.circle(img, box[0], 3, (0, 0, 255), -1)
     cv2.circle(img, box[1], 3, (0, 255, 0), -1)
     cv2.circle(img, box[2], 3, (255, 0, 0), -1)

@@ -187,7 +187,8 @@ def start(path, name):
 
 if __name__ == '__main__':
 
-    path = '../resources/dataset/BirdView/001---changzhou'
+    # path = '../resources/dataset/crossroad3/'
+    path = '../dataset/BirdView/001---changzhou'
 
     start(path, 'west_1.jpg')
     # start(path, 'east_1.jpg')

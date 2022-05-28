@@ -8,33 +8,14 @@ import numpy as np
 def nothing(x):
     pass
 
-
-if __name__ == '__main__':
-    # Load image
-
-    path = '../resources/dataset/BirdView/001---changzhou/south_1.jpg'
-    # fileName = path + 'north_1.jpg'
-
-    # path = '../../out/'
-    # fileName = 'h_west_1.jpg'
-
-    img = cv2.imread(path)
+def realtime_semantic_detector_RGB(img):
 
     # Create a window
     cv2.namedWindow('settings')
-    # cv2.namedWindow('darkness')
-    # cv2.namedWindow('gauss')
-    # cv2.namedWindow('edges')
-    # cv2.namedWindow('final')
 
-    # cv2.namedWindow('image')
-
-    # Create trackbars for color change
-    # Hue is from 0-179 for Opencv
-
-    cv2.createTrackbar('threshold1', 'settings', 0, 10000, nothing)
-    cv2.createTrackbar('threshold2', 'settings', 0, 10000, nothing)
-    cv2.setTrackbarPos('threshold1', 'settings', 50)
+    cv2.createTrackbar('threshold1', 'settings', 0, 400, nothing)
+    cv2.createTrackbar('threshold2', 'settings', 0, 400, nothing)
+    cv2.setTrackbarPos('threshold1', 'settings', 250)
     cv2.setTrackbarPos('threshold2', 'settings', 150)
 
     cv2.createTrackbar('line rho', 'settings', 1, 10, nothing)
@@ -45,7 +26,7 @@ if __name__ == '__main__':
     cv2.setTrackbarPos('line rho', 'settings', 1)
     cv2.setTrackbarPos('line theta', 'settings', 180)
     cv2.setTrackbarPos('line threshold', 'settings', 50)
-    cv2.setTrackbarPos('minLine', 'settings', 50)
+    cv2.setTrackbarPos('minLine', 'settings', 5)
     cv2.setTrackbarPos('maxLine', 'settings', 10)
 
     # Initialize
@@ -107,20 +88,16 @@ if __name__ == '__main__':
                 for line in lines:
                     x1, y1, x2, y2 = line[0]
                     if abs(y1 - y2) < 10:
-                        # if y1 > height // 2 and y2 > height // 2:
-                        # View lines
-                        # cv2.line(img, (x1, y1), (x2, y2), (0, 0, 127), 2)
-                        # vertical_line.append([x1, y1, x2, y2])
-                        cv2.line(ones, (x1, y1), (x2, y2), (0, 255, 0), 2, cv2.LINE_AA)
-                        continue
-                    # elif y1 > height - 10 or y2 > height - 10:
-                    #     cv2.line(ones, (x1, y1), (x2, y2), (255, 0, 255), 2, cv2.LINE_AA)
-                    # else:
+                        if y1 < height//9 and y2 < height//9:
+                            continue
+                        else:
+                            cv2.line(ones, (x1, y1), (x2, y2), (0, 255, 0), 2, cv2.LINE_AA)
+                            continue
                     cv2.line(ones, (x1, y1), (x2, y2), (0, 0, 255), 2, cv2.LINE_AA)
 
-            cv2.imshow('image', cv2.resize(img_result, (600, 500)))
-            cv2.imshow("Detected Lines (in red) - Probabilistic Line Transform", cv2.resize(cdstP, (600, 500)))
-            cv2.imshow("ones", cv2.resize(ones, (600, 500)))
+            # cv2.imshow('image', cv2.resize(img_result, (600, 500)))
+            cv2.imshow("Canny", cv2.resize(cdstP, (400, 300)))
+            cv2.imshow("Lines", cv2.resize(ones, (600, 500)))
 
         # Display result image
         # cv2.imshow('darkness', cv2.resize(darkGrey, (400, 300)))
@@ -131,7 +108,6 @@ if __name__ == '__main__':
 
         if cv2.waitKey(10) & 0xFF == ord('q'):
             break
-
 
     cv2.destroyAllWindows()
     cv2.waitKey()
