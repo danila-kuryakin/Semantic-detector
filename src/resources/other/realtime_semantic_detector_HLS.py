@@ -10,8 +10,9 @@ def nothing(x):
 if __name__ == '__main__':
     # Load image
 
-    path = '../resources/dataset/BirdView/001---changzhou/'
+    path = '../dataset/BirdView/001---changzhou/'
     fileName = path + 'north_1.jpg'
+    # fileName = '../resources/dataset/crossroad3/camera0_up.png'
 
     # path = '../../out/'
     # fileName = 'h_west_1.jpg'
@@ -34,7 +35,7 @@ if __name__ == '__main__':
     cv2.createTrackbar('alpha', 'settings', 0, 100, nothing)
     cv2.createTrackbar('beta', 'settings', 0, 100, nothing)
     cv2.createTrackbar('gamma', 'settings', 0, 100, nothing)
-    cv2.setTrackbarPos('alpha', 'settings', 40)
+    cv2.setTrackbarPos('alpha', 'settings', 84)
     cv2.setTrackbarPos('beta', 'settings', 60)
     cv2.setTrackbarPos('gamma', 'settings', 0)
 
@@ -42,7 +43,7 @@ if __name__ == '__main__':
     cv2.createTrackbar('LMin', 'settings', 0, 255, nothing)
     cv2.createTrackbar('SMin', 'settings', 0, 255, nothing)
     cv2.setTrackbarPos('HMin', 'settings', 0)
-    cv2.setTrackbarPos('LMin', 'settings', 180)
+    cv2.setTrackbarPos('LMin', 'settings', 160)
     cv2.setTrackbarPos('SMin', 'settings', 0)
 
     cv2.createTrackbar('HMax', 'settings', 0, 255, nothing)
@@ -54,8 +55,8 @@ if __name__ == '__main__':
 
     cv2.createTrackbar('threshold1', 'settings', 0, 500, nothing)
     cv2.createTrackbar('threshold2', 'settings', 0, 500, nothing)
-    cv2.setTrackbarPos('threshold1', 'settings', 50)
-    cv2.setTrackbarPos('threshold2', 'settings', 150)
+    cv2.setTrackbarPos('threshold1', 'settings', 100)
+    cv2.setTrackbarPos('threshold2', 'settings', 100)
 
     cv2.createTrackbar('line rho', 'settings', 1, 10, nothing)
     cv2.createTrackbar('line theta', 'settings', 1, 360, nothing)
@@ -64,8 +65,8 @@ if __name__ == '__main__':
     cv2.createTrackbar('maxLine', 'settings', 0, 200, nothing)
     cv2.setTrackbarPos('line rho', 'settings', 1)
     cv2.setTrackbarPos('line theta', 'settings', 180)
-    cv2.setTrackbarPos('line threshold', 'settings', 50)
-    cv2.setTrackbarPos('minLine', 'settings', 50)
+    cv2.setTrackbarPos('line threshold', 'settings', 20)
+    cv2.setTrackbarPos('minLine', 'settings', 5)
     cv2.setTrackbarPos('maxLine', 'settings', 10)
 
     # Initialize
@@ -154,18 +155,25 @@ if __name__ == '__main__':
             pMaxLineGap = maxLineGap
 
             ones = np.ones(img.shape)
+            height, width, _ = img.shape
             if lines is not None:
                 for line in lines:
                     x1, y1, x2, y2 = line[0]
-                    cv2.line(ones, (x1, y1), (x2, y2), (0, 0, 255), 2)
+                    if abs(y1 - y2) < 10:
+                        if y1 < height // 9 and y2 < height // 9:
+                            continue
+                        else:
+                            cv2.line(ones, (x1, y1), (x2, y2), (0, 255, 0), 2, cv2.LINE_AA)
+                            continue
+                    cv2.line(ones, (x1, y1), (x2, y2), (0, 0, 255), 2, cv2.LINE_AA)
 
-            cv2.imshow('ones', cv2.resize(ones, (600, 500)))
+            cv2.imshow('lines', cv2.resize(ones, (600, 500)))
             # cv2.imshow("Detected Lines (in red) - Probabilistic Line Transform", cv2.resize(cdstP, (600, 500)))
 
         # Display result image
         # cv2.imshow('darkness', cv2.resize(darkGrey, (400, 300)))
         # cv2.imshow('gauss', cv2.resize(gauss, (400, 300)))
-        cv2.imshow('edges', cv2.resize(edges, (400, 300)))
+        cv2.imshow('canny', cv2.resize(edges, (400, 300)))
         cv2.imshow('final', cv2.resize(result, (400, 300)))
 
 

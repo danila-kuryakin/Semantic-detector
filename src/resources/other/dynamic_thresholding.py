@@ -54,7 +54,7 @@ def dynamic_thresholding(img):
 
 
 if __name__ == '__main__':
-    path = '../resources/dataset/BirdView/001---changzhou/south_1.jpg'
+    path = '../dataset/BirdView/001---changzhou/south_1.jpg'
     # path = '../resources/dataset/crossroad3_with_sun/camera6_right.png'
 
     img = cv2.imread(path)
