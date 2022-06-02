@@ -41,6 +41,7 @@ def line_detection(img):
   cv2.imshow("imgHLS", cv2.resize(imgHLS, (800, 600)))
   # Yellow highlight
   HLSYellow = cv2.inRange(imgHLS, (10, 60, 60), (40, 210, 255))
+
   cv2.imshow("HLSYellow", cv2.resize(HLSYellow, (800, 600)))
   # White highlight
   HLSWhite = cv2.inRange(imgHLS, (0, 180, 0), (255, 255, 255))
@@ -165,7 +166,7 @@ def image_homography(img):
 
 
 if __name__ == '__main__':
-  image = cv2.imread('../resources/dataset/BirdView/013---yancheng/south_1.jpg')
+  image = cv2.imread('../resources/dataset/BirdView/013---yancheng/east_1.jpg')
   image2 = cv2.imread('../resources/dataset/BirdView/013---yancheng/west_1.jpg')
   bird_view1 = image_homography(image)
   bird_view2 = image_homography(image2)

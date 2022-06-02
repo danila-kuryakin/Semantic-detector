@@ -7,11 +7,11 @@ from matplotlib import pyplot as plt
 if __name__ == '__main__':
   start_time = time.time()
   top, bot, left, right = 100, 100, 0, 500
-  img1 = cv2.imread('../resources/dataset/BirdView/011---taiyuan/west+east.jpg')
-  img2 = cv2.imread('../resources/dataset/BirdView/011---taiyuan/west+east2.jpg')
+  img1 = cv2.imread('../../out/west+east.jpg')
+  img2 = cv2.imread('../resources/dataset/BirdView/014--danya/teble/33.jpg')
 
   # img1 = imutils.rotate(img1, angle=-90)
-  img2 = imutils.rotate(img2, angle=180)
+  #img2 = imutils.rotate(img2, angle=180)
 
 
   srcImg = cv2.copyMakeBorder(img1, top, bot, left, right, cv2.BORDER_CONSTANT, value=(0, 0, 0))
