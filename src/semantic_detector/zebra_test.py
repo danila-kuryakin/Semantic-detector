@@ -37,16 +37,12 @@ def lineIntersect(m1, b1, m2, b2):
 
 # process a frame
 def process(im):
-    start = timeit.timeit()  # start timer
 
     # initialize some variables
     x, y, *_ = im.shape
-    x = 800
-    y = 410
-    W = 800
-    H = 410
-    radius = 250  # px
-    thresh = 170
+    W, H, *_ = im.shape
+
+    radius = 250# px
     bw_width = 170
 
     bxLeft = []
@@ -59,10 +55,10 @@ def process(im):
     boundedRight = []
 
     # 1. filter the white color
-    lower = np.array([170, 170, 170])
+    lower = np.array([100, 100, 100])
     upper = np.array([255, 255, 255])
     mask = cv2.inRange(im, lower, upper)
-
+    cv2.imshow('mask', cv2.resize(mask, (800, 1000)))
     # 2. erode the frame
     erodeSize = int(y / 30)
     erodeStructure = cv2.getStructuringElement(cv2.MORPH_RECT, (erodeSize, 1))
@@ -95,13 +91,13 @@ def process(im):
 
     # 4. are the points bounded within the median circle?
     for i in bxbyLeftArray:
-        if (((medianL[0] - i[0]) ** 2 + (medianL[1] - i[1]) ** 2) < radius ** 2) == True:
+        if (((medianL[0] - i[0]) ** 2 + (medianL[1] - i[1]) ** 2) < radius ** 5) == True:
             boundedLeft.append(i)
 
     boundedLeft = np.asarray(boundedLeft)
 
     for i in bxbyRightArray:
-        if (((medianR[0] - i[0]) ** 2 + (medianR[1] - i[1]) ** 2) < radius ** 2) == True:
+        if (((medianR[0] - i[0]) ** 2 + (medianR[1] - i[1]) ** 2) < radius ** 5) == True:
             boundedRight.append(i)
 
     boundedRight = np.asarray(boundedRight)
@@ -155,24 +151,13 @@ def process(im):
         cv2.line(im, (int(x0) - int(m) * int(vx), int(y0) - int(m) * int(vy)), (int(x0) + int(m) * int(vx), int(y0) + int(m) * int(vy)), (255, 0, 0), 3)
         cv2.line(im, (int(x0_R) - int(m) * int(vx_R), int(y0_R) - int(m) * int(vy_R)), (int(x0_R) + int(m) * int(vx_R), int(y0_R) + int(m) * int(vy_R)), (255, 0, 0), 3)
 
-    # 8. calculating the direction vector
-    POVx = W / 2  # camera POV - center of the screen
-    POVy = H / 2  # camera POV - center of the screen
-
-
-    # focal length in pixels = (image width in pixels) * (focal length in mm) / (CCD width in mm)
-    focalpx = int(W * 4.26 / 6.604)  # all in mm
-
-    end = timeit.timeit()  # STOP TIMER
-    time_ = end - start
-
     return im
 
+cap = cv2.imread('E:\Semantic-detector\out/5/template.jpg')  # load a video
+#img = cap[431:748, 0:333]
 
-
-cap = cv2.imread('test_zebra.jpg')  # load a video
 processedFrame = process(cap)
-img = cv2.imshow('Processed', processedFrame)
+img = cv2.imshow('Processed', cv2.resize(processedFrame, (800,1000)))
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()

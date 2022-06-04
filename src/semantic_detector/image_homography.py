@@ -11,7 +11,7 @@ import pickle
 #Ability to show images of all stages of the program 0/1
 DB_show_images = 0
 DB_show_ALG_lines = 0
-DB_show_ALG_lines_ALL = 1
+DB_show_ALG_lines_ALL = 0
 DB_show_FIN_lines_points = 1
 
 
@@ -116,7 +116,7 @@ def line_detection(img):
             continue
 
         # Classification up line
-        if y1 < height // 3.7 and y2 < height // 3.7 : # нужно вынести как переменные масштабирование
+        if y1 < height // 3.5 and y2 < height // 3.5 : # нужно вынести как переменные масштабирование
             # View lines
             cv2.line(img, (x1, y1), (x2, y2), (150, 0, 150), 1) if DB_show_ALG_lines == 1 else 0
 
@@ -379,19 +379,24 @@ def image_homography(img):
 
     # homography value 2
     img_quad_corners = np.float32([point_ru, point_lu, new_point_ld, new_point_rd])
+    print('Center coords: ', img_quad_corners)
+    variables_file = open("img_quad_corners.txt", "wb")
+    pickle.dump(img_quad_corners, variables_file)
+    variables_file.close()
 
+    Scale_factor = 8
     # Image homography
-    h, mask = cv2.findHomography(img_square_corners, img_quad_corners)
-    bird_view = cv2.warpPerspective(img, h, (width, height))
-    cv2.imshow('bird_view', cv2.resize(bird_view, (1000, 563))) if DB_show_images == 1 else 0
+    h, mask = cv2.findHomography(img_square_corners, img_quad_corners*Scale_factor)
+    bird_view = cv2.warpPerspective(img, h, (width*Scale_factor, height*Scale_factor))
+    #cv2.imshow('bird_view', bird_view)
 
     #Crop the image
     c = mnoj/5
-    a = int(height*(1-(mnoj-c)))
-    b = int(width*(mnoj+c))
+    a = int(Scale_factor*height*(1-(mnoj-c)))
+    b = int(Scale_factor*width*(mnoj+c))
     cropped = bird_view[0:a, 0:b]
-    cv2.imshow('cropped', cv2.resize(cropped, (b, a)))
-    cv2.imwrite('../../out/homography.jpg', cv2.resize(cropped, (b, a), interpolation= cv2.INTER_CUBIC))
+    cv2.imshow('cropped', cv2.resize(cropped, (b//Scale_factor, a//Scale_factor)))
+    cv2.imwrite('../../out/homography5.jpg', cv2.resize(cropped, (b, a), interpolation= cv2.INTER_CUBIC))
 
     # View image
     cv2.imshow('Null', cv2.resize(img, (1000, 563)))
@@ -400,7 +405,9 @@ def image_homography(img):
 
 if __name__ == '__main__':
 
-    img = cv2.imread('../resources/dataset/BirdView/008---lean/west_1.jpg')
+    # img = cv2.imread('../resources/dataset/BirdView/008---lean/west_1.jpg')
+    img = cv2.imread('../resources/dataset/BirdView/005---lanzhou/west_1.jpg')
+
     bird_view = image_homography(img)
     #cv2.imwrite('../../out/homography.jpg', cv2.resize(bird_view, (1920, 1080)))
 
