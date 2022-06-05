@@ -1,4 +1,5 @@
 import cv2
+import imutils
 import numpy as np
 
 drawing = False  # true if mouse is pressed
@@ -56,13 +57,14 @@ def clear_image(img):
 # Инициализация двух начальных изображений
 def image_initialization():
   print('Images initialization')
-  src_image = cv2.resize(cv2.imread('E_PS.jpg', -1), (800, 600))
+  src_image = cv2.resize(cv2.imread('h_east_1.jpg.png', -1), (800, 600))
   src_copy = src_image.copy()
   cv2.namedWindow('src')
   cv2.moveWindow("src", 80, 80)
   cv2.setMouseCallback('src', select_points_src)
 
-  dst_image = cv2.resize(cv2.imread('W_PS.jpg', -1), (800, 600))
+  dst_image = cv2.resize(cv2.imread('h_west_1.jpg.png', -1), (800, 600))
+  dst_image = imutils.rotate(dst_image, angle=180)
   dst_copy = dst_image.copy()
   cv2.namedWindow('dst')
   cv2.moveWindow("dst", 780, 80)
@@ -150,8 +152,8 @@ while 1:
 
   images_callback()
   if k == ord('s'):
-    #save_points_by_hand(s_copy, d_copy)
-    save_points_static()
+    save_points_by_hand(s_copy, d_copy)
+    #save_points_static()
   elif k == ord('h'):
     mPlan_view = get_plan_view(src_img, dst_img)
   elif k == ord('m'):
