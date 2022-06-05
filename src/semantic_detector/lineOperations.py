@@ -1,4 +1,3 @@
-
 # Searches for linear equation variables
 # y = kx + b
 def find_line_equation(line):
@@ -13,3 +12,8 @@ def find_intersection_point(line_a, line_b):
     x = int((line_b['b'] - line_a['b'])/(line_a['k'] - line_b['k']))
     y = int(line_b['k'] * x + line_b['b'])
     return x, y
+
+
+def move_line(line, x, y):
+    x1, y1, x2, y2 = line
+    return [x1 + x, y1 + y, x2 + x, y2 + y]
