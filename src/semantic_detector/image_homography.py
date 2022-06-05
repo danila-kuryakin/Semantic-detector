@@ -12,7 +12,7 @@ import pickle
 DB_show_images = 0
 DB_show_ALG_lines = 0
 DB_show_ALG_lines_ALL = 0
-DB_show_FIN_lines_points = 1
+DB_show_FIN_lines_points = 0
 
 
 def find_line_equation(line):
@@ -22,6 +22,7 @@ def find_line_equation(line):
         b = y2 - k * x2
         return {'k': k, 'b': b}
     else:
+        print('Ошибка в нахождении пересечения линий')
         return {'k': 0, 'b': 0}
 
 # Looking for the point where the lines intersect
@@ -71,7 +72,7 @@ def line_detection(img):
 
     # Line detection
     height, width, _ = img.shape
-    lines = cv2.HoughLinesP(testEdges, 2, np.pi/180, 250, minLineLength=height-height//5, maxLineGap=height)
+    lines = cv2.HoughLinesP(testEdges, 2, np.pi/100, 250, minLineLength=height-height//5, maxLineGap=height)
     left_line   = [width, 0, width, height]
     right_line  = [0, 0, 0, height]
     up_line     = [0, 0, width, 0]
@@ -102,7 +103,7 @@ def line_detection(img):
 
 
         # Classification down line
-        if y1 > height - height//2 and y2 > height - height//2: # нужно вынести как переменные масштабирование
+        if y1 > height - height//2.5 and y2 > height - height//2.5: # нужно вынести как переменные масштабирование
             # View lines
             cv2.line(img, (x1, y1), (x2, y2), ( 150, 0,0), 1) if DB_show_ALG_lines == 1 else 0
 
@@ -335,7 +336,10 @@ def point_detection(left_line, right_line, up_line, down_line):
 
     return point_lu, point_ru, point_rd, point_ld
 
-def image_homography(img):
+### Изменить координаты SIDE и DATASET
+def image_homography(img, SIDE, DATASET):
+
+
 
     #find line coordinates
     left_line, right_line, up_line, down_line = line_detection(img) #Hand_line_detection(img)
@@ -374,15 +378,12 @@ def image_homography(img):
     img_square_corners = np.float32([point_ru, point_lu, point_ld, point_rd])
 
     # Reset crossway width proportions
-    mnoj = math.fabs((point_ru[0]-point_lu[0])/(point_rd[0] -point_ld[0]))*0.8
+    mnoj = math.fabs((point_ru[0]-point_lu[0])/(point_rd[0] -point_ld[0]))*1.2
     point_ru, point_lu, new_point_ld, new_point_rd = [new_point_ru[0]*mnoj,new_point_ru[1]],[point_lu[0]*mnoj,point_lu[1]],[new_point_ld[0]*mnoj,new_point_ld[1]],[new_point_rd[0]*mnoj,new_point_rd[1]]
 
     # homography value 2
     img_quad_corners = np.float32([point_ru, point_lu, new_point_ld, new_point_rd])
-    print('Center coords: ', img_quad_corners)
-    variables_file = open("img_quad_corners.txt", "wb")
-    pickle.dump(img_quad_corners, variables_file)
-    variables_file.close()
+
 
     Scale_factor = 8
     # Image homography
@@ -390,14 +391,22 @@ def image_homography(img):
     bird_view = cv2.warpPerspective(img, h, (width*Scale_factor, height*Scale_factor))
     #cv2.imshow('bird_view', bird_view)
 
+    #point_lu, point_ru, point_rd, point_ld = (1015, 313), (1323, 302), (1575, 649), (741, 664)
+    #img_quad_corners = np.float32([point_ru, point_lu, point_ld, point_rd])
+    print('Center coords: ', img_quad_corners)
+    variables_file = open('../../out/{}/STEPS/Step_1/{}_img_quad_corners.txt'.format(DATASET, SIDE), "wb")
+    pickle.dump(img_quad_corners, variables_file)
+    variables_file.close()
+
     #Crop the image
     c = mnoj/5
     a = int(Scale_factor*height*(1-(mnoj-c)))
     b = int(Scale_factor*width*(mnoj+c))
     cropped = bird_view[0:a, 0:b]
     cv2.imshow('cropped', cv2.resize(cropped, (b//Scale_factor, a//Scale_factor)))
-    cv2.imwrite('../../out/homography5.jpg', cv2.resize(cropped, (b, a), interpolation= cv2.INTER_CUBIC))
 
+
+    cv2.imwrite('../../out/{}/STEPS/Step_1/{}_1080.jpg'.format(DATASET, SIDE), cv2.resize(cropped, (b, a), interpolation= cv2.INTER_CUBIC))
     # View image
     cv2.imshow('Null', cv2.resize(img, (1000, 563)))
     return bird_view
@@ -405,10 +414,15 @@ def image_homography(img):
 
 if __name__ == '__main__':
 
-    # img = cv2.imread('../resources/dataset/BirdView/008---lean/west_1.jpg')
-    img = cv2.imread('../resources/dataset/BirdView/005---lanzhou/west_1.jpg')
 
-    bird_view = image_homography(img)
+    # при запихивании в функцию необходимо передавать параметр стороны SIDE = S N W E и имя папки для датасета для корректного поворота и сохранения ( а определять такой параметр при загрузке изображения)
+    SIDE = 'South'
+    DATASET = 'Data_5'
+
+    # img = cv2.imread('../resources/dataset/BirdView/008---lean/west_1.jpg')
+    img = cv2.imread('../resources/dataset/BirdView/005---lanzhou/south_1.jpg')
+
+    bird_view = image_homography(img, SIDE, DATASET)
     #cv2.imwrite('../../out/homography.jpg', cv2.resize(bird_view, (1920, 1080)))
 
     cv2.waitKey()

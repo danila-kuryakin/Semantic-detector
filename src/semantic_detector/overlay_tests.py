@@ -131,7 +131,7 @@ def merge_base_images(null_img, merging_img, type):
 
 # наложение 4 кусочков изображения с зеброй и линиями
 def image_slitching(img_null, img_N, img_S, img_W, img_E):
-    cv2.rectangle(img_null, (sq_X_0, sq_Y_0), (sq_X_1, sq_Y_1), (255, 255, 0), 2) if DB_show_square_lines == 1 else 0
+
 
     # creating North part
     img_N_cut = img_N[0:sq_Y_0, sq_X_0:sq_X_1]
@@ -154,15 +154,23 @@ def image_slitching(img_null, img_N, img_S, img_W, img_E):
 
     East_null = merge_base_images(West_null, img_E_cut, "East")
     # cv2.imshow('East_null', East_null)
+    cv2.rectangle(img_null, (sq_X_0, sq_Y_0), (sq_X_1, sq_Y_1), (255, 255, 0), 2) if DB_show_square_lines == 1 else 0
     return East_null
 
 
 if __name__ == '__main__':
-    img_null = cv2.imread('../../out/5/PS/null.jpg')
-    img_N = cv2.imread('../../out/5/PS/N_PS.jpg')
-    img_S = cv2.imread('../../out/5/PS/S_PS.jpg')
-    img_W = cv2.imread('../../out/5/PS/W_PS.jpg')
-    img_E = cv2.imread('../../out/5/PS/E_PS.jpg')
+
+    # при запихивании в функцию необходимо передавать параметр стороны SIDE = S N W E и имя папки для датасета для корректного поворота и сохранения ( а определять такой параметр при загрузке изображения)
+    DATASET = 'Data_5'
+
+
+    img_null = cv2.imread('../../out/null.jpg')
+    img_N = cv2.imread('../../out/{}/STEPS/Step_2/North_1080.jpg'.format(DATASET))
+    img_S = cv2.imread('../../out/{}/STEPS/Step_2/South_1080.jpg'.format(DATASET))
+    img_W = cv2.imread('../../out/trash/5/PS/W_PS.jpg')
+    img_E = cv2.imread('../../out/trash/5/PS/E_PS.jpg')
+
+
 
 
     bg_merge = image_bg(img_null, img_N, img_S, img_W, img_E)
