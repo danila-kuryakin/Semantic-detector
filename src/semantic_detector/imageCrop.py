@@ -3,7 +3,7 @@
 """
 import cv2
 
-image = cv2.resize(cv2.imread('h_west_1.jpg.png'), (800, 600))
+image = cv2.resize(cv2.imread('h_south_1.jpg.png'), (1920, 1080))
 
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_OTSU + cv2.THRESH_BINARY)[1]
@@ -17,6 +17,6 @@ for c in cnts:
   image = image[y:y + h, x:x + w]
   break
 
-cv2.imshow('end', image)
-#cv2.imwrite('imageCrop.jpg', image)
+#cv2.imshow('end', image)
+cv2.imwrite('south.jpg', image)
 cv2.waitKey()

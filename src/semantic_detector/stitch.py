@@ -57,14 +57,13 @@ def clear_image(img):
 # Инициализация двух начальных изображений
 def image_initialization():
   print('Images initialization')
-  src_image = cv2.resize(cv2.imread('h_east_1.jpg.png', -1), (800, 600))
+  src_image = cv2.resize(cv2.imread('west.png', -1), (800, 600))
   src_copy = src_image.copy()
   cv2.namedWindow('src')
   cv2.moveWindow("src", 80, 80)
   cv2.setMouseCallback('src', select_points_src)
 
-  dst_image = cv2.resize(cv2.imread('h_west_1.jpg.png', -1), (800, 600))
-  dst_image = imutils.rotate(dst_image, angle=180)
+  dst_image = cv2.resize(cv2.imread('east.png', -1), (800, 600))
   dst_copy = dst_image.copy()
   cv2.namedWindow('dst')
   cv2.moveWindow("dst", 780, 80)
@@ -122,7 +121,7 @@ def merge_and_clearing(src, dst, name_file):
   img1_bg = cv2.bitwise_and(merge, merge, mask=mask_inv)
   # Изменение цвета шва под "цвет дороги"
   blank_image = np.zeros((600, 800, 3), np.uint8)
-  blank_image[:, 0:800] = (87, 88, 91)
+  blank_image[:, 0:800] = (255, 255, 255)
   blank_image = cv2.bitwise_and(blank_image, blank_image, mask=mask)
   finally_merge = cv2.add(img1_bg, blank_image)
   cv2.imshow('final', finally_merge)
