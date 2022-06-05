@@ -53,6 +53,7 @@ def clear_image(img):
   return img1_bg
 
 
+# Инициализация двух начальных изображений
 def image_initialization():
   print('Images initialization')
   src_image = cv2.resize(cv2.imread('E_PS.jpg', -1), (800, 600))
@@ -70,6 +71,7 @@ def image_initialization():
   return src_copy, dst_copy, src_image, dst_image
 
 
+# Сохранение точек выставленных вручную
 def save_points_by_hand(copy_s, copy_d):
   print('Save points')
   cv2.circle(copy_s, (src_x, src_y), 5, (0, 255, 0), -1)
@@ -82,6 +84,7 @@ def save_points_by_hand(copy_s, copy_d):
   print(dst_list)
 
 
+# Статическое сохранение всех необходимых точек
 def save_points_static():
   print('Save points')
   src_list.append([[611, 192], [607, 234], [610, 278], [608, 319], [360, 468], [271, 300], [399, 129], [433, 468],
@@ -97,7 +100,7 @@ def save_points_static():
 
 
 # Сшивание и "чистка" образовавшихся швов
-def merge_and_clearing(src, dst):
+def merge_and_clearing(src, dst, name_file):
   print('Merge and clearing views')
   # Обработка входных изображений
   dst = clear_image(dst)
@@ -121,16 +124,19 @@ def merge_and_clearing(src, dst):
   blank_image = cv2.bitwise_and(blank_image, blank_image, mask=mask)
   finally_merge = cv2.add(img1_bg, blank_image)
   cv2.imshow('final', finally_merge)
-  cv2.imwrite('../../out/images_stitching.jpg', finally_merge)
+  file_path = "../../out/" + name_file + ".jpg"
+  print(file_path)
+  cv2.imwrite(format(file_path), finally_merge)
 
 
+# Метод отслеживания нажатий на картинку и отрисовка на них точек
 def images_callback():
   cv2.setMouseCallback('src', select_points_src)
   cv2.setMouseCallback('dst', select_points_dst)
 
 
+name_of_stitching_file = input("Enter final file name: ")
 s_copy, d_copy, src_img, dst_img = image_initialization()
-
 """
 Клавиша 's' - сохранение нанесённых точек
 Клавиша 'h' - построение перспективного преобразования
@@ -144,12 +150,12 @@ while 1:
 
   images_callback()
   if k == ord('s'):
-    save_points_by_hand(s_copy, d_copy)
-    #save_points_static()
+    #save_points_by_hand(s_copy, d_copy)
+    save_points_static()
   elif k == ord('h'):
     mPlan_view = get_plan_view(src_img, dst_img)
   elif k == ord('m'):
-    merge_and_clearing(src_img, dst_img)
+    merge_and_clearing(src_img, dst_img, name_of_stitching_file)
   elif k == ord('e'):
     break
 
