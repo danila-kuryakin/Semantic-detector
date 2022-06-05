@@ -5,6 +5,20 @@ import numpy
 import numpy as np
 import lineOperations
 
+class LinearEquation:
+
+    def __init__(self):
+        self.line = dict()
+
+    def add_line(self, key, value):
+        lines = []
+        if list(filter(lambda l: key == l, self.line)) == []:
+            self.line[key] = [value]
+        else:
+            coefficientB = self.line.get(key)
+            coefficientB.append(value)
+            self.line[key] = coefficientB
+
 def realtime_semantic_detector_RGB(img, minLineLength, maxLineGap):
     threshold1 = 250
     threshold2 = 150
@@ -27,8 +41,8 @@ def realtime_semantic_detector_RGB(img, minLineLength, maxLineGap):
     # ones = np.ones(img.shape)
     zeros = np.zeros(img.shape)
 
-    linesList = []
-    linearEquation = []
+    # linesList = []
+    linearEquation = LinearEquation()
 
     height, width, _ = img.shape
     if lines is not None:
@@ -43,29 +57,32 @@ def realtime_semantic_detector_RGB(img, minLineLength, maxLineGap):
                     # cv2.line(ones, (x1, y1), (x2, y2), (0, 255, 0), 2, cv2.LINE_AA)
                     continue
             cv2.line(zeros, (x1, y1), (x2, y2), (255, 255, 255), 1, cv2.LINE_AA)
+            # linesList.append(line[0])
+            equation = lineOperations.find_line_equation(line[0])
+            # equation = linearEquation.add_line(lineOperations.find_line_equation(line[0]))
+            linearEquation.add_line(equation['k'], equation['b'])
 
-            if len(linesList) == 0:
-                linesList.append(line)
-            else:
-                for l in linesList:
-                    x1List, y1List, x2List, y2List = l[0]
+    ret_line = []
+    for k in linearEquation.line.keys():
+        if len(linearEquation.line[k]) < 10:
+            continue
+        sum_b = sum(linearEquation.line[k])/len(linearEquation.line[k])
+        y1 = 0
+        x1 = int((y1 - sum_b) / k)
+        y2 = height
+        x2 = int((y2 - sum_b) / k)
+        # cv2.line(zeros, (x1, y1), (x2, y2), (0, 0, 255), 1, cv2.LINE_AA)
+        ret_line.append([x1, y1, x2, y2])
 
-                    dx11 = abs(x1 - x1List)
-                    dx12 = abs(x1 - x2List)
-                    dy11 = abs(y1 - y1List)
-                    dy12 = abs(y1 - y2List)
+        # print(linearEquation.line[k])
 
-                    dx21 = abs(x2 - x1List)
-                    dx22 = abs(x2 - x2List)
-                    dy21 = abs(y2 - y1List)
-                    dy22 = abs(y2 - y2List)
-                    if dx11 <= deltaX and dy11 <= deltaY or dx12 <= deltaX and dy12 <= deltaY:
-                        cv2.circle(zeros, (x1, y1), 3, (0, 0, 255), -1)
-                        print("V1: ", l, line, (dx11, dy11, dx12, dy12))
-                    elif dx21 <= deltaX and dy21 <= deltaY or dx22 <= deltaX and dy22 <= deltaY:
-                        cv2.circle(zeros, (x2, y2), 3, (255, 0, 0), -1)
-                        print("V2: ", l, line, (dx21, dy21, dx22, dy22))
-                linesList.append(line)
+    ret_line.append([0, int(height/2), width, int(height/2)])
+    ret_line.append([0, int(height - (height/5)), width, int(height - (height/5))])
 
+    for line in ret_line:
+        x1, y1, x2, y2 = line
+        print(x1, y1, x2, y2)
+        cv2.line(img, (x1, y1), (x2, y2), (0, 0, 255), 2, cv2.LINE_AA)
 
+    cv2.imshow("img", cv2.resize(img, (600, 500)))
     return zeros
