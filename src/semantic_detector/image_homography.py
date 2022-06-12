@@ -72,7 +72,7 @@ def line_detection(img):
 
     # Line detection
     height, width, _ = img.shape
-    lines = cv2.HoughLinesP(testEdges, 2, np.pi/100, 250, minLineLength=height-height//5, maxLineGap=height)
+    lines = cv2.HoughLinesP(testEdges, 2, np.pi/180, 250, minLineLength=height-height//5, maxLineGap=height)
     left_line   = [width, 0, width, height]
     right_line  = [0, 0, 0, height]
     up_line     = [0, 0, width, 0]
@@ -103,7 +103,7 @@ def line_detection(img):
 
 
         # Classification down line
-        if y1 > height - height//2.5 and y2 > height - height//2.5: # нужно вынести как переменные масштабирование
+        if y1 > height - height//2 and y2 > height - height//2: # нужно вынести как переменные масштабирование
             # View lines
             cv2.line(img, (x1, y1), (x2, y2), ( 150, 0,0), 1) if DB_show_ALG_lines == 1 else 0
 
@@ -378,7 +378,7 @@ def image_homography(img, SIDE, DATASET):
     img_square_corners = np.float32([point_ru, point_lu, point_ld, point_rd])
 
     # Reset crossway width proportions
-    mnoj = math.fabs((point_ru[0]-point_lu[0])/(point_rd[0] -point_ld[0]))*1.2
+    mnoj = math.fabs((point_ru[0]-point_lu[0])/(point_rd[0] -point_ld[0]))*0.7
     point_ru, point_lu, new_point_ld, new_point_rd = [new_point_ru[0]*mnoj,new_point_ru[1]],[point_lu[0]*mnoj,point_lu[1]],[new_point_ld[0]*mnoj,new_point_ld[1]],[new_point_rd[0]*mnoj,new_point_rd[1]]
 
     # homography value 2
@@ -416,11 +416,11 @@ if __name__ == '__main__':
 
 
     # при запихивании в функцию необходимо передавать параметр стороны SIDE = S N W E и имя папки для датасета для корректного поворота и сохранения ( а определять такой параметр при загрузке изображения)
-    SIDE = 'South'
+    SIDE = 'West'
     DATASET = 'Data_5'
 
     # img = cv2.imread('../resources/dataset/BirdView/008---lean/west_1.jpg')
-    img = cv2.imread('../resources/dataset/BirdView/005---lanzhou/south_1.jpg')
+    img = cv2.imread('../resources/dataset/BirdView/005---lanzhou/west_1.jpg')
 
     bird_view = image_homography(img, SIDE, DATASET)
     #cv2.imwrite('../../out/homography.jpg', cv2.resize(bird_view, (1920, 1080)))

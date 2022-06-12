@@ -12,7 +12,7 @@ Scale_factor = 4    # Для Даниных 1 def = 4
 Preview_scale = 1.8 # Для Даниных 1.2 def = 1.8
 
 # при запихивании в функцию необходимо передавать параметр стороны SIDE = S N W E и имя папки для датасета для корректного поворота и сохранения ( а определять такой параметр при загрузке изображения)
-SIDE = 'South'
+SIDE = 'West'
 DATASET = 'Data_5'
 
 def expand_line(x1, y1, x2, y2, size) :
@@ -65,10 +65,10 @@ down_line = [0, height, width, height]
 
 LINE_SKEW_L_R = 60              # def = 40  предел наклона линий cлева и справа
 LINE_SKEW_U_D = 50              # def = 10  предел наклона линий сверху и снизу
-MIN_SIZE_NEAREST_LINE_L_R = 350  # def = 97  минимальный размер ближайшей к центру линии cлева и справа (чтобы алгорим не сломался и не выбрал короткую линию как ближайшую к центру
+MIN_SIZE_NEAREST_LINE_L_R = 200  # def = 97  минимальный размер ближайшей к центру линии cлева и справа (чтобы алгорим не сломался и не выбрал короткую линию как ближайшую к центру
 MIN_SIZE_NEAREST_LINE_U = 10   # def = 570  минимальный размер ближайшей к центру линии сверху (чтобы алгорим не сломался и не выбрал короткую линию как ближайшую к центру
 MIN_SIZE_NEAREST_LINE_D = 400   # def = 570  минимальный размер ближайшей к центру линии снизу (чтобы алгорим не сломался и не выбрал короткую линию как ближайшую к центру
-NEARES_LINE_X_L_R = 25          # def = 25  порог выбора ближайших линий, работает только по X cлева и справа
+NEARES_LINE_X_L_R = 0.1          # def = 25  порог выбора ближайших линий, работает только по X cлева и справа
 NEARES_LINE_X_U_D = 20         # def = 25  порог выбора ближайших линий, работает только по X сверху и снизу
 DIV_LINE_Y = 30                # def = 1.5 фильтр коротких линий по Y, реализовано в условии: (abs(y1-y2) > (abs(left_line[1]-left_line[3]))//DIV_LINE_Y))
 # А еще иногда линия может находиться на том же расстоянии что и крайняя и не выделяться алгоритмо(тк используется ">" а не ">="
@@ -91,12 +91,14 @@ for line in lines:
         cv2.line(img, (x1, y1), (x2, y2), (0, 0, 255), 1) if DB_step_1_Interest_lines == 1 else 0
 
         #находим ближайшую к центру изображения линию слева
-        if ((x1>left_line[0]) or (x2>left_line[2])) and (MIN_SIZE_NEAREST_LINE_L_R < abs(y1 - y2)) :
+        # а еще иногда он выбирает не то условие из ((x2>left_line[2]) or (x1>left_line[0])) тк не оптимальная точка ближе неоптимальной
+        if ((x2>left_line[2]) or (x1>left_line[0])) and (MIN_SIZE_NEAREST_LINE_L_R < abs(y1 - y2)) :
             left_line = [x1, y1, x2, y2]
             x1_mean,y1_mean,x2_mean,y2_mean = x1, y1, x2, y2
 
         #находим все линии относительно ближайшей попадающей в выборку заданную выше( NEARES_LINE_X = 25 ) и усредняем
-        if ((NEARES_LINE_X_L_R > abs(x1-left_line[0]) > 0) or ((NEARES_LINE_X_L_R > abs(x2-left_line[2]) > 0))) and ( abs(y1-y2) > (abs(left_line[1]-left_line[3]))//DIV_LINE_Y):
+        # а еще я убрал >0 в ((NEARES_LINE_X_L_R > abs(x1-left_line[0]) > 0  )
+        if ((NEARES_LINE_X_L_R > abs(x1-left_line[0])  ) or ((NEARES_LINE_X_L_R > abs(x2-left_line[2]) ))) and ( abs(y1-y2) > (abs(left_line[1]-left_line[3]))//DIV_LINE_Y):
             cv2.line(img, (x1, y1), (x2, y2), (0, 255, 255), 1) if DB_step_1_Math_lines == 1 else 0
             x1_mean,y1_mean,x2_mean,y2_mean = statistics.mean([x1, x1_mean]),statistics.mean([y1, y1_mean]),statistics.mean([x2, x2_mean]),statistics.mean([y2, y2_mean])
 
@@ -107,7 +109,7 @@ cv2.line(img, (x1, y1), (x2, y2), (255, 0, 0), 3) if DB_step_1_Math_lines == 1 e
 x1, y1, x2, y2 = expand_line(x1, y1, x2, y2, height)
 left_line_F = [x1, y1, x2, y2]
 cv2.line(img, (x1, y1), (x2, y2), (255, 255, 255), 1) if DB_step_1_Math_lines == 1 else 0
-'''
+
 # усредненная линия
 x1, y1, x2, y2 = x1_mean,left_line[1],x2_mean,left_line[3]
 cv2.line(img, (x1, y1), (x2, y2), (0, 256, 0), 2) if DB_step_1_Math_lines == 1 else 0
@@ -116,7 +118,7 @@ if (left_line[0]>left_line[2]) :
     cv2.line(img, (left_line[0], left_line[1]),((left_line[0] - x1_mean) + x2_mean, left_line[3]), (256, 0, 256),2) if DB_step_1_Math_lines == 1 else 0
 elif (left_line[2]>=left_line[0]) :
     cv2.line(img, ((left_line[2]-x2_mean) + x1_mean, left_line[1]),(left_line[2], left_line[3]), (256, 0, 256),2) if DB_step_1_Math_lines == 1 else 0
-'''
+
 # правая
 for line in lines:
 
@@ -218,6 +220,11 @@ for line in lines:
 x1, y1, x2, y2 = up_line[0], up_line[1], up_line[2], up_line[3]
 cv2.line(img, (x1, y1), (x2, y2), (255, 0, 0), 3) if DB_step_1_Math_lines == 1 else 0
 
+### достроенная линия
+x1, y1, x2, y2 = expand_line(x1, y1, x2, y2, width)
+up_line_F = [x1, y1, x2, y2]
+cv2.line(img, (x1, y1), (x2, y2), (255, 255, 255), 1) if DB_step_1_Math_lines == 1 else 0
+
 # усредненная линия
 x1, y1, x2, y2 = up_line[0],y1_mean,up_line[2],y2_mean
 cv2.line(img, (x1, y1), (x2, y2), (0, 256, 0), 2) if DB_step_1_Math_lines == 1 else 0
@@ -229,10 +236,7 @@ elif (up_line[3]>=up_line[1]) :
     cv2.line(img, (up_line[0], (up_line[3]-y2_mean) + y1_mean),(up_line[2], up_line[3]), (256, 0, 256),2) if DB_step_1_Math_lines == 1 else 0
     x1, y1, x2, y2 = up_line[0], ((up_line[3]-y2_mean) + y1_mean),up_line[2], up_line[3]
 
-### достроенная линия
-x1, y1, x2, y2 = expand_line(x1, y1, x2, y2, width)
-up_line_F = [x1, y1, x2, y2]
-cv2.line(img, (x1, y1), (x2, y2), (255, 255, 255), 1) if DB_step_1_Math_lines == 1 else 0
+
 
 
 point_lu, point_ru, point_rd, point_ld = point_detection(left_line_F, right_line_F, up_line_F, down_line_F)
@@ -263,9 +267,11 @@ elif SIDE == 'South':
     print ('Выбрана South')
     img_quad_corners = np.float32([sq_cd_UP_RIGHT, sq_cd_UP_LEFT, sq_cd_DN_LEFT, sq_cd_DN_RIGHT])
 elif SIDE == 'West':
-    print('Не определена функция для стороны West')
+    print('Выбрана West')
+    img_quad_corners = np.float32([sq_cd_DN_RIGHT, sq_cd_UP_RIGHT, sq_cd_UP_LEFT, sq_cd_DN_LEFT])
 elif SIDE == 'East':
-    print('Не определена функция для стороны East')
+    print('Выбрана East')
+    img_quad_corners = np.float32([sq_cd_UP_LEFT, sq_cd_DN_LEFT, sq_cd_DN_RIGHT, sq_cd_UP_RIGHT])
 
 h, mask = cv2.findHomography(img_square_corners, img_quad_corners)
 res_image = cv2.warpPerspective(img, h, (1920, 1080))

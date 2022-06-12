@@ -167,8 +167,8 @@ if __name__ == '__main__':
     img_null = cv2.imread('../../out/null.jpg')
     img_N = cv2.imread('../../out/{}/STEPS/Step_2/North_1080.jpg'.format(DATASET))
     img_S = cv2.imread('../../out/{}/STEPS/Step_2/South_1080.jpg'.format(DATASET))
-    img_W = cv2.imread('../../out/trash/5/PS/W_PS.jpg')
-    img_E = cv2.imread('../../out/trash/5/PS/E_PS.jpg')
+    img_W = cv2.imread('../../out/{}/STEPS/Step_2/West_1080.jpg'.format(DATASET))
+    img_E = cv2.imread('../../out/{}/STEPS/Step_2/East_1080.jpg'.format(DATASET))
 
 
 
