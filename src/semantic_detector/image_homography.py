@@ -18,7 +18,11 @@ def line_detection(img):
     canny = cv2.Canny(th, 0, 255, None, 3)
 
     # Line detection
-    lines = cv2.HoughLinesP(canny, 1, np.pi/180, 200, minLineLength=height-height//4, maxLineGap=height//2)
+    return cv2.HoughLinesP(canny, 1, np.pi/180, 200, minLineLength=height-height//4, maxLineGap=height//2)
+
+
+def line_classification(img, lines):
+    height, width, _ = img.shape
 
     start_left_line = [width, 0, width, height]
     left_line = start_left_line
@@ -110,13 +114,14 @@ def image_homography(image):
     # TODO: remove magic
     magic_indent = 150
 
-    left_line, right_line, up_line, down_line = line_detection(img)
+    lines = line_detection(img)
+    left_line, right_line, up_line, down_line = line_classification(img, lines)
 
     # View lines
-    cv2.line(img, (right_line[0], right_line[1]), (right_line[2], right_line[3]), (0, 255, 0, 255), 2)
-    cv2.line(img, (left_line[0], left_line[1]), (left_line[2], left_line[3]), (0, 0, 255, 255), 2)
-    cv2.line(img, (down_line[0], down_line[1]), (down_line[2], down_line[3]), (255, 0, 0, 255), 2)
-    cv2.line(img, (up_line[0], up_line[1]), (up_line[2], up_line[3]), (127, 0, 255, 255), 2)
+    # cv2.line(img, (right_line[0], right_line[1]), (right_line[2], right_line[3]), (0, 255, 0, 255), 2)
+    # cv2.line(img, (left_line[0], left_line[1]), (left_line[2], left_line[3]), (0, 0, 255, 255), 2)
+    # cv2.line(img, (down_line[0], down_line[1]), (down_line[2], down_line[3]), (255, 0, 0, 255), 2)
+    # cv2.line(img, (up_line[0], up_line[1]), (up_line[2], up_line[3]), (127, 0, 255, 255), 2)
 
     left_line = lineOperations.move_line(left_line, width, height*2)
     right_line = lineOperations.move_line(right_line, width, height*2)
@@ -155,7 +160,6 @@ def image_homography(image):
 
     return bird_view, img
 
-
 def start(path, name):
     full_path = path + '/' + name
 
@@ -181,10 +185,10 @@ if __name__ == '__main__':
 
     start(path, 'south_1.jpg')
     # start(path, 'south_2.jpg')
-    start(path, 'north_1.jpg')
-    start(path, 'east_1.jpg')
+    # start(path, 'north_1.jpg')
+    # start(path, 'east_1.jpg')
     # start(path, 'east_2.jpg')
-    start(path, 'west_1.jpg')
+    # start(path, 'west_1.jpg')
     # start(path, 'west_2.jpg')
 
     cv2.waitKey()
