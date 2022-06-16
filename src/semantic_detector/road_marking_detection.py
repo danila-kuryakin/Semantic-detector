@@ -1,3 +1,7 @@
+"""
+Скрипт с поиском контуров для разметки by Istomin
+"""
+
 import cv2
 import numpy
 import numpy as np
