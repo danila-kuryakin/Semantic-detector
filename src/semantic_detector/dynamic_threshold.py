@@ -9,7 +9,7 @@ def nothing(x):
 if __name__ == '__main__':
 
     # Load image
-    image = cv2.imread('north_1.jpg')
+    image = cv2.imread('../resources/dataset/BirdView/001---changzhou/east.jpg')
 
     # Create a window
     cv2.namedWindow('image')
