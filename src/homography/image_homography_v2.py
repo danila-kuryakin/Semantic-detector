@@ -124,10 +124,10 @@ def image_homography(image):
     cv2.line(img, (down_line[0], down_line[1]), (down_line[2], down_line[3]), (255, 0, 0, 255), 2)
     cv2.line(img, (up_line[0], up_line[1]), (up_line[2], up_line[3]), (127, 0, 255, 255), 2)
 
-    left_line = lineOperations.move_line(left_line, width, height*2)
-    right_line = lineOperations.move_line(right_line, width, height*2)
-    up_line = lineOperations.move_line(up_line, width, height*2)
-    down_line = lineOperations.move_line(down_line, width, height*2)
+    left_line = lineOperations.move_line(left_line, width, height * 2)
+    right_line = lineOperations.move_line(right_line, width, height * 2)
+    up_line = lineOperations.move_line(up_line, width, height * 2)
+    down_line = lineOperations.move_line(down_line, width, height * 2)
 
     point_lu, point_ru, point_rd, point_ld = point_detection(left_line, right_line, up_line, down_line)
 
