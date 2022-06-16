@@ -395,7 +395,7 @@ def image_homography(img):
 
 
 if __name__ == '__main__':
-  img = cv2.imread('../resources/dataset/BirdView/014--danya/camera4_down.png')
+  img = cv2.imread('../resources/dataset/BirdView/001---changzhou/camera6_right.png')
   # img = cv2.imread('../resources/dataset/BirdView/013---yancheng/west_1.jpg')
   bird_view = image_homography(img)
 

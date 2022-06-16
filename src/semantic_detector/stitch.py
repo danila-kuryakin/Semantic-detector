@@ -55,15 +55,17 @@ def clear_image(img):
 
 
 # Инициализация двух начальных изображений
-def image_initialization():
+def image_initialization(path_one, path_two):
   print('Images initialization')
-  src_image = cv2.resize(cv2.imread('west.png', -1), (800, 600))
+  src_image = cv2.resize(cv2.imread(path_one, -1), (1280, 720))
+  src_image = imutils.rotate(src_image, angle=-90)
   src_copy = src_image.copy()
   cv2.namedWindow('src')
   cv2.moveWindow("src", 80, 80)
   cv2.setMouseCallback('src', select_points_src)
 
-  dst_image = cv2.resize(cv2.imread('east.png', -1), (800, 600))
+  dst_image = cv2.resize(cv2.imread(path_two, -1), (1280, 720))
+
   dst_copy = dst_image.copy()
   cv2.namedWindow('dst')
   cv2.moveWindow("dst", 780, 80)
@@ -101,7 +103,7 @@ def save_points_static():
 
 
 # Сшивание и "чистка" образовавшихся швов
-def merge_and_clearing(src, dst, name_file):
+def merge_and_clearing(src, dst, name_file, path):
   print('Merge and clearing views')
   # Обработка входных изображений
   dst = clear_image(dst)
@@ -119,13 +121,16 @@ def merge_and_clearing(src, dst, name_file):
   ret, mask = cv2.threshold(img2gray, 20, 255, cv2.THRESH_BINARY_INV)
   mask_inv = cv2.bitwise_not(mask)
   img1_bg = cv2.bitwise_and(merge, merge, mask=mask_inv)
+
   # Изменение цвета шва под "цвет дороги"
-  blank_image = np.zeros((600, 800, 3), np.uint8)
-  blank_image[:, 0:800] = (255, 255, 255)
+  blank_image = np.zeros((720, 1280, 3), np.uint8)
+  blank_image[:, 0:1280] = (87, 88, 91)
   blank_image = cv2.bitwise_and(blank_image, blank_image, mask=mask)
+
   finally_merge = cv2.add(img1_bg, blank_image)
+  #finally_merge = img1_bg
   cv2.imshow('final', finally_merge)
-  file_path = "../../out/" + name_file + ".jpg"
+  file_path = path + name_file + ".jpg"
   print(file_path)
   cv2.imwrite(format(file_path), finally_merge)
 
@@ -136,28 +141,39 @@ def images_callback():
   cv2.setMouseCallback('dst', select_points_dst)
 
 
-name_of_stitching_file = input("Enter final file name: ")
-s_copy, d_copy, src_img, dst_img = image_initialization()
-"""
-Клавиша 's' - сохранение нанесённых точек
-Клавиша 'h' - построение перспективного преобразования
-Клавиша 'm' - сшивание двух изображений (результат сохраняется в папку out) 
-Клавиша 'e' - выход из программы
-"""
-while 1:
-  cv2.imshow('src', s_copy)
-  cv2.imshow('dst', d_copy)
-  k = cv2.waitKey(1) & 0xFF
+def start(path_img):
+  """
+  Клавиша 's' - сохранение нанесённых точек
+  Клавиша 'h' - построение перспективного преобразования
+  Клавиша 'm' - сшивание двух изображений (результат сохраняется в папку out)
+  Клавиша 'e' - выход из программы
+  """
+  while 1:
+    cv2.imshow('src', s_copy)
+    cv2.imshow('dst', d_copy)
+    k = cv2.waitKey(1) & 0xFF
 
-  images_callback()
-  if k == ord('s'):
-    save_points_by_hand(s_copy, d_copy)
-    #save_points_static()
-  elif k == ord('h'):
-    mPlan_view = get_plan_view(src_img, dst_img)
-  elif k == ord('m'):
-    merge_and_clearing(src_img, dst_img, name_of_stitching_file)
-  elif k == ord('e'):
-    break
+    images_callback()
+    if k == ord('s'):
+      save_points_by_hand(s_copy, d_copy)
+      #save_points_static()
+    elif k == ord('h'):
+      mPlan_view = get_plan_view(src_img, dst_img)
+    elif k == ord('m'):
+      merge_and_clearing(src_img, dst_img, name_of_stitching_file, path_img)
+    elif k == ord('e'):
+      break
 
+
+path = '../resources/dataset/HomographyView/013---yancheng/'
+
+image_two = 'North_1080+East_1080+South_1080.jpg'
+image_one = 'West_1080.jpg'
+
+full_path_one = path + image_one
+full_path_two = path + image_two
+
+name_of_stitching_file = image_one.partition('.')[0] + "+" + image_two.partition('.')[0]
+s_copy, d_copy, src_img, dst_img = image_initialization(full_path_one, full_path_two)
+start(path)
 cv2.destroyAllWindows()
