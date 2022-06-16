@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import pickle
 import statistics
-from image_homography import point_detection
+from Step_1_image_homography_v_2 import point_detection
 
 DB_ALL_lines = 0 # показать все линии
 DB_step_1_Interest_lines = 0 # показать линии интереса (для каждой стороны)
@@ -12,8 +12,8 @@ Scale_factor = 4    # Для Даниных 1 def = 4
 Preview_scale = 1.8 # Для Даниных 1.2 def = 1.8
 
 # при запихивании в функцию необходимо передавать параметр стороны SIDE = S N W E и имя папки для датасета для корректного поворота и сохранения ( а определять такой параметр при загрузке изображения)
-SIDE = 'West'
-DATASET = 'Data_5'
+SIDE = 'East_1'
+DATASET = 'Data_1'
 
 def expand_line(x1, y1, x2, y2, size) :
     if x1==x2 :

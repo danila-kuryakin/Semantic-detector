@@ -12,7 +12,7 @@ import pickle
 DB_show_images = 0
 DB_show_ALG_lines = 0
 DB_show_ALG_lines_ALL = 0
-DB_show_FIN_lines_points = 0
+DB_show_FIN_lines_points = 1
 
 
 def find_line_equation(line):
@@ -342,7 +342,7 @@ def image_homography(img, SIDE, DATASET):
 
 
     #find line coordinates
-    left_line, right_line, up_line, down_line = line_detection(img) #Hand_line_detection(img)
+    left_line, right_line, up_line, down_line = line_detection(img) # Hand_line_detection(img)
     # find point coordinates
     point_lu, point_ru, point_rd, point_ld = point_detection(left_line, right_line, up_line, down_line)
 
@@ -378,7 +378,7 @@ def image_homography(img, SIDE, DATASET):
     img_square_corners = np.float32([point_ru, point_lu, point_ld, point_rd])
 
     # Reset crossway width proportions
-    mnoj = math.fabs((point_ru[0]-point_lu[0])/(point_rd[0] -point_ld[0]))*0.7
+    mnoj = math.fabs((point_ru[0]-point_lu[0])/(point_rd[0] -point_ld[0]))*1
     point_ru, point_lu, new_point_ld, new_point_rd = [new_point_ru[0]*mnoj,new_point_ru[1]],[point_lu[0]*mnoj,point_lu[1]],[new_point_ld[0]*mnoj,new_point_ld[1]],[new_point_rd[0]*mnoj,new_point_rd[1]]
 
     # homography value 2
@@ -402,7 +402,7 @@ def image_homography(img, SIDE, DATASET):
     c = mnoj/5
     a = int(Scale_factor*height*(1-(mnoj-c)))
     b = int(Scale_factor*width*(mnoj+c))
-    cropped = bird_view[0:a, 0:b]
+    cropped = bird_view[0:a+2500, 0:b]
     cv2.imshow('cropped', cv2.resize(cropped, (b//Scale_factor, a//Scale_factor)))
 
 
@@ -415,12 +415,18 @@ def image_homography(img, SIDE, DATASET):
 if __name__ == '__main__':
 
 
-    # при запихивании в функцию необходимо передавать параметр стороны SIDE = S N W E и имя папки для датасета для корректного поворота и сохранения ( а определять такой параметр при загрузке изображения)
-    SIDE = 'West'
-    DATASET = 'Data_5'
+    IMG_NAME = 'west_1.jpg'
 
+
+
+
+
+    DATASET = 'Data_13'
+    # при запихивании в функцию необходимо передавать параметр стороны SIDE = S N W E и имя папки для датасета для корректного поворота и сохранения ( а определять такой параметр при загрузке изображения)
+
+    SIDE = IMG_NAME
     # img = cv2.imread('../resources/dataset/BirdView/008---lean/west_1.jpg')
-    img = cv2.imread('../resources/dataset/BirdView/005---lanzhou/west_1.jpg')
+    img = cv2.imread('../resources/dataset/BirdView/013---yancheng/{}'.format(IMG_NAME))
 
     bird_view = image_homography(img, SIDE, DATASET)
     #cv2.imwrite('../../out/homography.jpg', cv2.resize(bird_view, (1920, 1080)))
