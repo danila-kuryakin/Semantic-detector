@@ -39,7 +39,7 @@ def line_classification(img, lines):
     for line in lines:
 
         x1, y1, x2, y2 = line[0]
-        # cv2.line(img, (x1, y1), (x2, y2), (0, 127, 127), 2)
+        cv2.line(img, (x1, y1), (x2, y2), (0, 127, 127, 255), 2)
         # Classification vertical lines
         if y2 > height-height//4 and y1 < height//4:
             # View lines
@@ -56,9 +56,10 @@ def line_classification(img, lines):
             [down_x1, down_y1, down_x2, down_y2] = down_line
             # View lines
             # cv2.line(img, (x1, y1), (x2, y2), (127, 0, 0), 1)
-            if y1 > down_y1 and y2 > down_y2:
-                down_line = [x1, y1, x2, y2]
-                continue
+            if abs(y1 - y2) < height // 20:
+                if y1 > down_y1 and y2 > down_y2:
+                    down_line = [x1, y1, x2, y2]
+                    continue
 
         if y1 < height//2 and y2 < height//2 and y1 > height//9 and y2 > height//9:
             [up_x1, up_y1, up_x2, up_y2] = up_line
@@ -118,10 +119,10 @@ def image_homography(image):
     left_line, right_line, up_line, down_line = line_classification(img, lines)
 
     # View lines
-    # cv2.line(img, (right_line[0], right_line[1]), (right_line[2], right_line[3]), (0, 255, 0, 255), 2)
-    # cv2.line(img, (left_line[0], left_line[1]), (left_line[2], left_line[3]), (0, 0, 255, 255), 2)
-    # cv2.line(img, (down_line[0], down_line[1]), (down_line[2], down_line[3]), (255, 0, 0, 255), 2)
-    # cv2.line(img, (up_line[0], up_line[1]), (up_line[2], up_line[3]), (127, 0, 255, 255), 2)
+    cv2.line(img, (right_line[0], right_line[1]), (right_line[2], right_line[3]), (0, 255, 0, 255), 2)
+    cv2.line(img, (left_line[0], left_line[1]), (left_line[2], left_line[3]), (0, 0, 255, 255), 2)
+    cv2.line(img, (down_line[0], down_line[1]), (down_line[2], down_line[3]), (255, 0, 0, 255), 2)
+    cv2.line(img, (up_line[0], up_line[1]), (up_line[2], up_line[3]), (127, 0, 255, 255), 2)
 
     left_line = lineOperations.move_line(left_line, width, height*2)
     right_line = lineOperations.move_line(right_line, width, height*2)
@@ -161,14 +162,15 @@ def image_homography(image):
     return bird_view, img
 
 def start(path, name):
-    full_path = path + '/' + name
+    # full_path = path + '/' + name
+    full_path = path + '/' + name + '.jpg'
 
     img = cv2.imread(full_path)
     try:
         bird_view, img_out = image_homography(img)
 
         # View image
-        cv2.imshow('ld_' + name, cv2.resize(img_out, (500, 400)))
+        # cv2.imshow('ld_' + name, cv2.resize(img_out, (500, 400)))
         cv2.imwrite('../../out/ld_' + name + '.png', img_out)
 
         # cv2.imshow('h_' + name, cv2.resize(bird_view, (600, 500)))
@@ -180,15 +182,17 @@ def start(path, name):
 
 if __name__ == '__main__':
 
-    path = '../resources/dataset/BirdView/001---changzhou/'
+    path = '../resources/dataset/BirdView/013---yancheng'
     # p = '../resources/dataset/BirdView/009---qiaoxi/south_1.jpg'
 
-    start(path, 'south_1.jpg')
-    # start(path, 'south_2.jpg')
-    # start(path, 'north_1.jpg')
-    # start(path, 'east_1.jpg')
-    # start(path, 'east_2.jpg')
-    # start(path, 'west_1.jpg')
-    # start(path, 'west_2.jpg')
+
+    start(path, 'east_1')
+    # start(path, 'east_2')
+    start(path, 'north_1')
+    # # start(path, 'east_2')
+    start(path, 'south_1')
+    # start(path, 'south_2')
+    start(path, 'west_1')
+    # start(path, 'west_2')
 
     cv2.waitKey()
