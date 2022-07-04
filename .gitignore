@@ -133,4 +133,4 @@ dmypy.json
 
 # Dataset
 out/
-src/resources
+src/resources/dataset
